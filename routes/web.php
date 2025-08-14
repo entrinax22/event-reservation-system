@@ -3,13 +3,31 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Home');
+    })->name('home');
+
+    Route::get('/business', function () {
+        return Inertia::render('Business');
+    })->name('business');
+
+    Route::get('/notifications', function () {
+        return Inertia::render('Notifications');
+    })->name('notifications');
+
+    Route::get('/mybookings', function () {
+        return Inertia::render('MyBookings');
+    })->name('mybookings');
+});
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin', function () {
+        return Inertia::render('Admin');
+    })->name('admin');
+});
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
