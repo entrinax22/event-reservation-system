@@ -1,4 +1,5 @@
 <template>
+    <Head title="Home" />
     <MainLayout>
         <section class="card rounded-2xl border border-black/20 bg-[rgba(0,0,0,0.78)] p-5 shadow-xl">
             <div class="min-h-[420px] rounded-xl bg-gradient-to-b from-white/5 to-white/0.5 p-4">
@@ -30,6 +31,7 @@
 
 <script setup>
 import MainLayout from '@/layouts/MainLayout.vue';
+import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

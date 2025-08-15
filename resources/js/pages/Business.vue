@@ -1,4 +1,5 @@
 <template>
+    <Head title="Business Details" />
     <MainLayout>
         <section class="card rounded-2xl border border-black/20 bg-[rgba(0,0,0,0.78)] p-5 shadow-xl">
             <h2 class="font-orbitron mb-4 text-xl text-[#00f5a0]">Business Details</h2>
@@ -9,6 +10,7 @@
 
 <script setup>
 import MainLayout from '@/layouts/MainLayout.vue';
+import { Head } from '@inertiajs/vue3';
 </script>
 
 <style scoped>
