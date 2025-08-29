@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -20,12 +21,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/mybookings', function () {
         return Inertia::render('MyBookings');
     })->name('mybookings');
+
+
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', function () {
         return Inertia::render('admin/AdminDashboard');
     })->name('admin');
+
+    Route::get('/admin/users', function () {
+        return Inertia::render('admin/tables/usersTable');
+    })->name('admin.users.table');
+
+    Route::get('/admin/users/list', [UserController::class, 'list'])->name('admin.users.list');
+    Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+    Route::post('/admin/users/store', [UserController::class, 'store'])->name('admin.users.store');
 });
 
 
