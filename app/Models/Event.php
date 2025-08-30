@@ -12,4 +12,9 @@ class Event extends Model
         'event_name',
         'event_description'
     ];
+
+    public function reservedEvents()
+    {
+        return $this->hasMany(ReservedEvent::class, 'event_id', 'event_id');
+    }
 }

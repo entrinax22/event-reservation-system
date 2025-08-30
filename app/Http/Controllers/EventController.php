@@ -149,4 +149,23 @@ class EventController extends Controller
             ], 500);
         }
     }
+
+    public function selectList(){
+        try {
+            $events = Event::select('event_id', 'event_name')->get();
+
+            return response()->json([
+                'result'  => true,
+                'message' => 'Users list retrieved successfully.',
+                'data' => $events
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while retrieving the user list.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

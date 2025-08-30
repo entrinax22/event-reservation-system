@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('reserved_material_id');
             $table->foreignId('reserved_event_id')->constrained()->onDelete('cascade');
             $table->foreignId('material_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity')->default(1);
             $table->timestamps();
         });
     }

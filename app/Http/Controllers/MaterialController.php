@@ -90,7 +90,6 @@ class MaterialController extends Controller
             ], 500);
         }
     }
-
     
     public function update(Request $request)
     {
@@ -148,6 +147,25 @@ class MaterialController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => 'An error occurred while deleting the material.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function selectList(){
+        try {
+            $materials = Material::select('material_id', 'material_name')->where('status', 'active')->get();
+
+            return response()->json([
+                'result'  => true,
+                'message' => 'Materials list retrieved successfully.',
+                'data' => $materials
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while retrieving the materials list.',
                 'error'   => $e->getMessage(),
             ], 500);
         }

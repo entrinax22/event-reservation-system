@@ -13,4 +13,9 @@ class Material extends Model
         'material_description',
         'status'
     ];
+
+    public function reservedEvents()
+    {
+        return $this->belongsToMany(ReservedEvent::class, 'reserved_materials', 'material_id', 'reserved_event_id');
+    }
 }

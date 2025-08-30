@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('reserved_events', function (Blueprint $table) {
             $table->id('reserved_event_id');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('client_name');
-            $table->string('client_contact_information');
+            $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->dateTime('event_date');
             $table->dateTime('event_end_date')->nullable();
             $table->decimal('total_cost', 10, 2)->default(0);

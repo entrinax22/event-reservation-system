@@ -1,77 +1,134 @@
 <!-- components/BaseTable.vue -->
 <template>
-    <div class="card rounded-2xl border border-black/30 bg-[rgba(0,0,0,0.85)] p-6 shadow-xl">
-        <div class="mb-4 flex items-center space-x-2" v-if="$slots.toolbar">
+    <div class="card rounded-2xl border border-black/30 bg-[rgba(0,0,0,0.85)] p-3 md:p-6 shadow-xl">
+        <!-- Toolbar -->
+        <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2" v-if="$slots.toolbar">
             <slot name="toolbar" />
         </div>
 
-        <h3 class="font-orbitron mb-4 text-xl text-[#00f5a0]">{{ title }}</h3>
+        <!-- Title -->
+        <h3 class="font-orbitron mb-4 text-lg md:text-xl text-[#00f5a0]">{{ title }}</h3>
 
-        <table class="w-full text-left text-sm text-white">
-            <thead class="border-b border-gray-700 text-[#7fbfb0]">
-                <tr>
-                    <th v-for="col in columns" :key="col.key" class="py-3">
-                        {{ col.label }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(row, index) in data" :key="row.id || index" class="border-b border-gray-700 hover:bg-gray-800/40">
-                    <td v-for="col in columns" :key="col.key" class="py-3">
-                        <template v-if="col.key === 'actions'">
-                            <!-- Slot for custom actions, fallback empty -->
-                            <slot name="actions" :row="row" :index="index"> </slot>
-                        </template>
-                        <template v-else>
-                            <span v-if="col.key !== 'status'">
-                                {{ row[col.key] }}
-                            </span>
-                            <span v-else :class="statusColor(row[col.key])">
-                                {{ row[col.key] }}
-                            </span>
-                        </template>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Desktop Table View -->
+        <div class="hidden lg:block overflow-x-auto">
+            <table class="w-full text-left text-sm text-white min-w-full">
+                <thead class="border-b border-gray-700 text-[#7fbfb0]">
+                    <tr>
+                        <th v-for="col in columns" :key="col.key" class="py-3 px-2 whitespace-nowrap">
+                            {{ col.label }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(row, index) in data" :key="row.id || index" class="border-b border-gray-700 hover:bg-gray-800/40">
+                        <td v-for="col in columns" :key="col.key" class="py-3 px-2">
+                            <template v-if="col.key === 'actions'">
+                                <slot name="actions" :row="row" :index="index"> </slot>
+                            </template>
+                            <template v-else-if="$slots[`cell-${col.key}`]">
+                                <slot :name="`cell-${col.key}`" :value="row[col.key]" :row="row" :index="index" />
+                            </template>
+                            <template v-else>
+                                <span v-if="col.key !== 'status'" class="break-words">
+                                    {{ row[col.key] }}
+                                </span>
+                                <span v-else :class="statusColor(row[col.key])">
+                                    {{ row[col.key] }}
+                                </span>
+                            </template>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-        <!-- Replace the existing pagination div with this -->
+        <!-- Mobile/Tablet Card View -->
+        <div class="lg:hidden space-y-4">
+            <div v-for="(row, index) in data" :key="row.id || index" 
+                 class="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
+                
+                <!-- Row cards for mobile -->
+                <div class="space-y-3">
+                    <template v-for="col in columns" :key="col.key">
+                        <!-- Skip actions column in main content, we'll add it at bottom -->
+                        <div v-if="col.key !== 'actions'" class="flex flex-col sm:flex-row sm:justify-between">
+                            <dt class="text-sm font-medium text-[#7fbfb0] mb-1 sm:mb-0">
+                                {{ col.label }}:
+                            </dt>
+                            <dd class="text-sm text-white sm:text-right flex-1 sm:ml-4">
+                                <template v-if="$slots[`cell-${col.key}`]">
+                                    <slot :name="`cell-${col.key}`" :value="row[col.key]" :row="row" :index="index" />
+                                </template>
+                                <template v-else>
+                                    <span v-if="col.key !== 'status'" class="break-words">
+                                        {{ row[col.key] }}
+                                    </span>
+                                    <span v-else :class="statusColor(row[col.key])">
+                                        {{ row[col.key] }}
+                                    </span>
+                                </template>
+                            </dd>
+                        </div>
+                    </template>
+                    
+                    <!-- Actions at bottom of each card -->
+                    <div class="pt-3 border-t border-gray-600 flex flex-wrap gap-2">
+                        <slot name="actions" :row="row" :index="index"> </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div v-if="pagination" class="mt-6 flex justify-center space-x-2 text-sm">
-            <button
-                @click="$emit('page-changed', pagination.current_page - 1)"
-                :disabled="pagination.current_page === 1"
-                class="rounded-full bg-[#00f5a0] px-4 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400"
-                aria-label="Previous Page"
-            >
-                Prev
-            </button>
+        <!-- No data message -->
+        <div v-if="!data || data.length === 0" class="text-center py-8 text-gray-400">
+            <p>No data available</p>
+        </div>
 
-            <!-- Page numbers -->
-            <button
-                v-for="page in pageNumbersToShow"
-                :key="page"
-                @click="$emit('page-changed', page)"
-                :class="[
-                    'rounded-full px-4 py-1 font-semibold',
-                    page === pagination.current_page ? 'cursor-default bg-[#00f5a0] text-black' : 'bg-black/40 text-white hover:bg-[#00c88a]',
-                ]"
-                :aria-current="page === pagination.current_page ? 'page' : null"
-            >
-                {{ page }}
-            </button>
+        <!-- Pagination -->
+        <div v-if="pagination && data && data.length > 0" class="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-2 text-sm">
+            <!-- Mobile: Stack buttons vertically on very small screens -->
+            <div class="flex flex-wrap justify-center gap-2">
+                <button
+                    @click="$emit('page-changed', pagination.current_page - 1)"
+                    :disabled="pagination.current_page === 1"
+                    class="rounded-full bg-[#00f5a0] px-3 sm:px-4 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400"
+                    aria-label="Previous Page"
+                >
+                    Prev
+                </button>
 
-            <button
-                @click="$emit('page-changed', pagination.current_page + 1)"
-                :disabled="pagination.current_page === pagination.last_page"
-                class="rounded-full bg-[#00f5a0] px-4 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400"
-                aria-label="Next Page"
-            >
-                Next
-            </button>
+                <!-- Page numbers -->
+                <button
+                    v-for="page in pageNumbersToShow"
+                    :key="page"
+                    @click="$emit('page-changed', page)"
+                    :class="[
+                        'rounded-full px-3 sm:px-4 py-1 font-semibold text-xs sm:text-sm',
+                        page === pagination.current_page ? 'cursor-default bg-[#00f5a0] text-black' : 'bg-black/40 text-white hover:bg-[#00c88a]',
+                    ]"
+                    :aria-current="page === pagination.current_page ? 'page' : null"
+                >
+                    {{ page }}
+                </button>
+
+                <button
+                    @click="$emit('page-changed', pagination.current_page + 1)"
+                    :disabled="pagination.current_page === pagination.last_page"
+                    class="rounded-full bg-[#00f5a0] px-3 sm:px-4 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400"
+                    aria-label="Next Page"
+                >
+                    Next
+                </button>
+            </div>
+            
+            <!-- Pagination info -->
+            <div class="text-xs text-gray-400 mt-2 sm:mt-0">
+                Page {{ pagination.current_page }} of {{ pagination.last_page }}
+            </div>
         </div>
     </div>
 </template>
+
 <script setup>
 import { computed } from 'vue';
 
@@ -98,19 +155,23 @@ function statusColor(status) {
             return 'px-2 py-1 rounded-full bg-green-600 text-white text-xs';
         case 'inactive':
             return 'px-2 py-1 rounded-full bg-gray-500 text-white text-xs';
+        case 'downpayment_update':
+            return 'px-2 py-1 rounded-full bg-orange-600 text-white text-xs';
         default:
             return 'px-2 py-1 rounded-full bg-gray-600 text-white text-xs';
     }
 }
 
-
-// Show maximum of 5 page buttons at a time
+// Show maximum of 3 pages on mobile, 5 on desktop
 const pageNumbersToShow = computed(() => {
     if (!props.pagination) return [];
 
     const total = props.pagination.last_page;
     const current = props.pagination.current_page;
-    const maxPagesToShow = 5;
+    
+    // Responsive page count - fewer on mobile
+    const maxPagesToShow = window.innerWidth < 640 ? 3 : 5;
+    
     let start = Math.max(current - Math.floor(maxPagesToShow / 2), 1);
     let end = start + maxPagesToShow - 1;
 
@@ -133,5 +194,24 @@ const pageNumbersToShow = computed(() => {
 }
 .card {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Custom scrollbar for horizontal scroll */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #00f5a0;
+    border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #00c88a;
 }
 </style>

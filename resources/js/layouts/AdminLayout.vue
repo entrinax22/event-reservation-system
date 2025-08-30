@@ -35,7 +35,7 @@
                                 <p class="px-2 text-xs font-semibold tracking-wider text-gray-400 uppercase">Main</p>
                                 <div class="mt-2 flex flex-col gap-2">
                                     <Link :href="route('home')" class="sidebar-link">Home</Link>
-                                    <Link :href="route('admin')" class="sidebar-link">Notifications</Link>
+                                    <Link :href="route('admin')" class="sidebar-link">Dashboard</Link>
                                 </div>
                             </div>
 
@@ -43,26 +43,10 @@
                             <div>
                                 <p class="px-2 text-xs font-semibold tracking-wider text-gray-400 uppercase">Tables</p>
                                 <div class="mt-2 flex flex-col gap-2">
-                                    <Link class="sidebar-link">Bookings Table</Link>
                                     <Link :href="route('admin.users.table')" class="sidebar-link">Users Table</Link>
                                     <Link :href="route('admin.events.table')" class="sidebar-link">Events Table</Link>
                                     <Link :href="route('admin.materials.table')" class="sidebar-link">Materials Table</Link>
-                                </div>
-                            </div>
-
-                            <!-- Settings -->
-                            <div>
-                                <p class="px-2 text-xs font-semibold tracking-wider text-gray-400 uppercase">Settings</p>
-                                <div class="mt-2">
-                                    <div class="sidebar-link flex items-center justify-between">
-                                        <span class="flex items-center gap-2">
-                                            <span>Settings</span>
-                                        </span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M10 3a7 7 0 100 14 7 7 0 000-14zm0 2a5 5 0 110 10A5 5 0 0110 5z" />
-                                            <path d="M10.707 9.293a1 1 0 00-1.414-1.414l-2.828 2.828a1 1 0 001.414 1.414l2.828-2.828z" />
-                                        </svg>
-                                    </div>
+                                    <Link :href="route('admin.reserved-events.table')" class="sidebar-link">Reserved Events Table</Link>
                                 </div>
                             </div>
                         </nav>

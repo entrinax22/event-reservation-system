@@ -160,6 +160,23 @@ class UserController extends Controller
         }
     }
 
+    public function selectList(){
+        try {
+            $users = User::select('user_id', 'name')->get();
 
+            return response()->json([
+                'result'  => true,
+                'message' => 'Users list retrieved successfully.',
+                'data' => $users
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while retrieving the user list.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 
 }
