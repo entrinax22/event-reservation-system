@@ -20,7 +20,8 @@ return new class extends Migration
             $table->dateTime('event_end_date')->nullable();
             $table->decimal('total_cost', 10, 2)->default(0);
             $table->string('event_notes')->nullable();
-            $table->enum('status', ['pending','accepted','paid_downpayment', 'completed', 'cancelled'])->default('pending');
+            $table->decimal('downpayment_amount', 10, 2)->default(0);
+            $table->enum('status', ['pending','accepted', 'downpayment_update','completed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
     }

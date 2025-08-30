@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('reserved_event_id')->constrained()->onDelete('cascade');
             $table->decimal('amount_paid', 10, 2);
+            $table->enum('status', ['pending','confirmed','cancelled'])->default('pending');
             $table->timestamps();
         });
     }

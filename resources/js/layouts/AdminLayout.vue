@@ -45,8 +45,8 @@
                                 <div class="mt-2 flex flex-col gap-2">
                                     <Link class="sidebar-link">Bookings Table</Link>
                                     <Link :href="route('admin.users.table')" class="sidebar-link">Users Table</Link>
-                                    <Link class="sidebar-link">Services Table</Link>
-                                    <Link class="sidebar-link">Materials Table</Link>
+                                    <Link :href="route('admin.events.table')" class="sidebar-link">Events Table</Link>
+                                    <Link :href="route('admin.materials.table')" class="sidebar-link">Materials Table</Link>
                                 </div>
                             </div>
 

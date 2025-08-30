@@ -82,6 +82,28 @@ const props = defineProps({
     pagination: { type: Object, default: null },
 });
 
+// statusColor helper
+function statusColor(status) {
+    if (!status) return '';
+    switch (status.toLowerCase()) {
+        case 'pending':
+            return 'px-2 py-1 rounded-full bg-yellow-500 text-white text-xs';
+        case 'accepted':
+            return 'px-2 py-1 rounded-full bg-blue-600 text-white text-xs';
+        case 'completed':
+            return 'px-2 py-1 rounded-full bg-green-600 text-white text-xs';
+        case 'cancelled':
+            return 'px-2 py-1 rounded-full bg-red-600 text-white text-xs';
+        case 'active':
+            return 'px-2 py-1 rounded-full bg-green-600 text-white text-xs';
+        case 'inactive':
+            return 'px-2 py-1 rounded-full bg-gray-500 text-white text-xs';
+        default:
+            return 'px-2 py-1 rounded-full bg-gray-600 text-white text-xs';
+    }
+}
+
+
 // Show maximum of 5 page buttons at a time
 const pageNumbersToShow = computed(() => {
     if (!props.pagination) return [];

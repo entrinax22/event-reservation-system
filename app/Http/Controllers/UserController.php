@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    public function index(){
+        return Inertia::render('admin/tables/usersTable');
+    }
+
     public function list(Request $request)
     {
         try {
@@ -34,7 +38,6 @@ class UserController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
-                    'must_change_password' => $user->must_change_password
                     // add more fields here if needed
                 ];
             });
@@ -75,25 +78,17 @@ class UserController extends Controller
                 'contact_information' => 'required|string'
             ]);
 
-            // Generate random password
-            $randomPassword = Str::random(10);
 
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'role' => $validated['role'],
-                'password' => Hash::make($randomPassword),
                 'contact_information' => $validated['contact_information'],
-                'must_change_password' => true,
             ]);
-
-            // // Optionally: Send password via email
-            // Mail::to($user->email)->send(new \App\Mail\SendInitialPassword($user, $randomPassword));
 
             return response()->json([
                 'result' => true,
                 'message' => 'User created successfully.',
-                'password_temporary' => $randomPassword
             ]);
         }catch (\Exception $e) {
             return response()->json([
@@ -103,24 +98,68 @@ class UserController extends Controller
         }
     }
 
-    public function showChangePasswordForm()
-    {
-        return Inertia::render('auth/change-password');
-    }
-
     public function update(Request $request)
     {
-        $request->validate([
-            'password' => ['required','confirmed','min:8'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,user_id',
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $request->user_id . ',user_id',
+                'role' => 'required|string|in:admin,user', 
+                'contact_information' => 'required|string|max:255'
+            ]);
 
-        $user = $request->user();
-        $user->update([
-            'password' => Hash::make($request->password),
-            'must_change_password' => false,
-        ]);
+            $user = User::findOrFail($request->user_id);
 
-        return redirect()->route('home')->with('success', 'Password changed successfully.');
+            $user->update($validated);
+
+            return response()->json([
+                'result'  => true,
+                'message' => 'User updated successfully.',
+                'user' => $user
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'Validation failed.',
+                'errors'  => $e->errors(),
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while updating the user.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
+
+    public function destroy(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,user_id',
+            ]);
+
+            $user = User::findOrFail($validated['user_id']); // use array syntax
+
+            $user->delete();
+
+            return response()->json([
+                'result'  => true,
+                'message' => 'User deleted successfully.',
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while deleting the user.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 
 }

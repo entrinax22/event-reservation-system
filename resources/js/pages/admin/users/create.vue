@@ -1,41 +1,3 @@
-<script setup>
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import axios from 'axios';
-import { ref } from 'vue';
-
-// Form state
-const form = ref({
-    name: '',
-    email: '',
-    contact_information: '',
-    role: '',
-    password: '',
-    password_confirmation: '',
-});
-
-const errors = ref({});
-const submitting = ref(false);
-
-async function createUser() {
-    submitting.value = true;
-    errors.value = {};
-
-    try {
-        const response = await axios.post(route('admin.users.store'), form.value);
-        alert('User created successfully!');
-        // Reset form
-        form.value = { name: '', email: '', contact: '', role: '', password: '', password_confirmation: '' };
-    } catch (error) {
-        if (error.response && error.response.data.errors) {
-            errors.value = error.response.data.errors;
-        } else {
-            alert('An unexpected error occurred.');
-        }
-    } finally {
-        submitting.value = false;
-    }
-}
-</script>
 
 <template>
     <Head title="Admin Dashboard - Users" />
@@ -118,3 +80,41 @@ async function createUser() {
         </section>
     </AdminLayout>
 </template>
+<script setup>
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import axios from 'axios';
+import { ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
+// Form state
+const form = ref({
+    name: '',
+    email: '',
+    contact_information: '',
+    role: '',
+    password: '',
+    password_confirmation: '',
+});
+
+const errors = ref({});
+const submitting = ref(false);
+
+async function createUser() {
+    submitting.value = true;
+    errors.value = {};
+
+    try {
+        const response = await axios.post(route('admin.users.store'), form.value);
+        alert('User created successfully!');
+        // Reset form
+        form.value = { name: '', email: '', contact: '', role: '', password: '', password_confirmation: '' };
+    } catch (error) {
+        if (error.response && error.response.data.errors) {
+            errors.value = error.response.data.errors;
+        } else {
+            alert('An unexpected error occurred.');
+        }
+    } finally {
+        submitting.value = false;
+    }
+}
+</script>

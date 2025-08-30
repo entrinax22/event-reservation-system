@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
-import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 
@@ -27,69 +22,90 @@ const submit = () => {
         <div class="animate-fadeIn w-full max-w-md rounded-2xl bg-[rgba(20,20,20,0.95)] p-8 text-center shadow-[0_0_25px_rgba(0,255,200,0.4)]">
             <img src="/logos.png" alt="Big City Logo" class="animate-pulseGlow mx-auto mb-5 w-36 drop-shadow-[0_0_10px_#00ffc8]" />
             <h2 class="text-shadow mb-5 text-2xl font-bold text-[#00ffc8]">Register</h2>
+
             <form method="POST" @submit.prevent="submit" class="flex flex-col gap-6">
                 <div class="grid gap-6">
-                    <div class="grid gap-2">
-                        <Label for="name">Name</Label>
-                        <Input
+                    <!-- Name -->
+                    <div class="grid gap-2 text-left">
+                        <label for="name" class="text-sm font-medium text-white">Name</label>
+                        <input
                             id="name"
                             type="text"
+                            v-model="form.name"
                             required
                             autofocus
                             :tabindex="1"
                             autocomplete="name"
-                            v-model="form.name"
                             placeholder="Full name"
+                            class="w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white placeholder-gray-400 focus:border-[#00f5a0] focus:ring focus:ring-[#00f5a0] focus:ring-opacity-50"
                         />
-                        <InputError :message="form.errors.name" />
+                        <p v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</p>
                     </div>
-                    <div class="grid gap-2">
-                        <Label for="email">Email address</Label>
-                        <Input
+
+                    <!-- Email -->
+                    <div class="grid gap-2 text-left">
+                        <label for="email" class="text-sm font-medium text-white">Email address</label>
+                        <input
                             id="email"
                             type="email"
+                            v-model="form.email"
                             required
                             :tabindex="2"
                             autocomplete="email"
-                            v-model="form.email"
                             placeholder="email@example.com"
+                            class="w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white placeholder-gray-400 focus:border-[#00f5a0] focus:ring focus:ring-[#00f5a0] focus:ring-opacity-50"
                         />
-                        <InputError :message="form.errors.email" />
+                        <p v-if="form.errors.email" class="text-sm text-red-500">{{ form.errors.email }}</p>
                     </div>
-                    <div class="grid gap-2">
-                        <Label for="password">Password</Label>
-                        <Input
+
+                    <!-- Password -->
+                    <div class="grid gap-2 text-left">
+                        <label for="password" class="text-sm font-medium text-white">Password</label>
+                        <input
                             id="password"
                             type="password"
+                            v-model="form.password"
                             required
                             :tabindex="3"
                             autocomplete="new-password"
-                            v-model="form.password"
                             placeholder="Password"
+                            class="w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white placeholder-gray-400 focus:border-[#00f5a0] focus:ring focus:ring-[#00f5a0] focus:ring-opacity-50"
                         />
-                        <InputError :message="form.errors.password" />
+                        <p v-if="form.errors.password" class="text-sm text-red-500">{{ form.errors.password }}</p>
                     </div>
-                    <div class="grid gap-2">
-                        <Label for="password_confirmation">Confirm password</Label>
-                        <Input
+
+                    <!-- Confirm Password -->
+                    <div class="grid gap-2 text-left">
+                        <label for="password_confirmation" class="text-sm font-medium text-white">Confirm password</label>
+                        <input
                             id="password_confirmation"
                             type="password"
+                            v-model="form.password_confirmation"
                             required
                             :tabindex="4"
                             autocomplete="new-password"
-                            v-model="form.password_confirmation"
                             placeholder="Confirm password"
+                            class="w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white placeholder-gray-400 focus:border-[#00f5a0] focus:ring focus:ring-[#00f5a0] focus:ring-opacity-50"
                         />
-                        <InputError :message="form.errors.password_confirmation" />
+                        <p v-if="form.errors.password_confirmation" class="text-sm text-red-500">{{ form.errors.password_confirmation }}</p>
                     </div>
-                    <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
-                        <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
+
+                    <!-- Submit -->
+                    <button
+                        type="submit"
+                        class="mt-2 flex w-full items-center justify-center rounded-md bg-[#00ffc8] px-4 py-2 font-semibold text-black hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-500"
+                        tabindex="5"
+                        :disabled="form.processing"
+                    >
+                        <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
                         Create account
-                    </Button>
+                    </button>
                 </div>
-                <div class="mt-2 text-center text-sm text-muted-foreground">
+
+                <!-- Login Link -->
+                <div class="mt-2 text-center text-sm text-gray-400">
                     Already have an account?
-                    <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="6">Log in</TextLink>
+                    <a :href="route('login')" class="text-[#00ffc8] hover:underline" :tabindex="6">Log in</a>
                 </div>
             </form>
         </div>
@@ -106,7 +122,6 @@ const submit = () => {
         filter: drop-shadow(0 0 20px #00ffc8);
     }
 }
-
 .animate-pulseGlow {
     animation: pulseGlow 2s infinite ease-in-out;
 }
@@ -121,11 +136,9 @@ const submit = () => {
         transform: scale(1);
     }
 }
-
 .animate-fadeIn {
     animation: fadeIn 0.6s ease-in-out;
 }
-
 .text-shadow {
     text-shadow: 0 0 8px #00ffc8;
 }
