@@ -9,11 +9,11 @@
 
       <!-- Dynamic Form -->
       <form @submit.prevent="handleSubmit">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div :class="`grid grid-cols-1 md:grid-cols-${columns} gap-6`">
           <div 
             v-for="field in fields" 
             :key="field.key"
-            :class="field.fullWidth ? 'md:col-span-2' : ''"
+            :class="field.fullWidth ? `md:col-span-${columns}` : ''"
           >
             <label class="block text-sm text-gray-300 mb-2">{{ field.label }}</label>
 
@@ -104,8 +104,9 @@ import BaseSelect from './BaseSelect.vue';
 const props = defineProps({
   show: Boolean,
   title: { type: String, default: 'Edit' },
-  fields: { type: Array, required: true }, // [{key, label, type, fullWidth?, options, multiple}]
+  fields: { type: Array, required: true },
   modelValue: { type: Object, default: () => ({}) },
+  columns: { type: Number, default: 2 } // <--- dynamic columns
 });
 
 const emit = defineEmits(['close', 'save', 'update:modelValue']);

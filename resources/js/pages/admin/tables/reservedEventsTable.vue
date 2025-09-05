@@ -112,6 +112,7 @@
                 title="Edit Reservation"
                 :fields="reservationFields"
                 v-model="selectedReservation"
+                :columns="2"
                 @close="showEditModal = false"
                 @save="updateReservation"
             />
@@ -286,7 +287,6 @@ const reservationFields = [
     { key: 'total_cost', label: 'Total Cost', type: 'number' },
     { key: 'downpayment_amount', label: 'Downpayment (5% of Total)', type: 'number' },
     { key: 'materials', label: 'Materials', type: 'baseselect', multiple: true, options: [] },
-    { key: 'event_notes', label: 'Event Notes', type: 'textarea' },
     {
         key: 'status',
         label: 'Status',
@@ -298,7 +298,9 @@ const reservationFields = [
             { value: 'completed', label: 'Completed' },
             { value: 'cancelled', label: 'Cancelled' },
         ],
-    }
+    },
+    { key: 'event_notes', label: 'Event Notes', type: 'textarea' },
+    
 ]
 
 async function openEditReservation(reservation) {

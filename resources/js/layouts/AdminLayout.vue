@@ -70,8 +70,8 @@
         </transition>
 
         <!-- Main content -->
-        <main class="min-h-screen flex-1 md:ml-0">
-            <div class="p-4 md:p-10">
+        <main class="min-h-screen flex-1 md:ml-0 overflow-x-auto overflow-y-auto">
+            <div class="p-4 md:p-10 min-w-full">
                 <slot />
             </div>
         </main>

@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\ReservedEventController;
+use App\Http\Controllers\AdminDashboardController;
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -32,6 +33,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', function () {
         return Inertia::render('admin/AdminDashboard');
     })->name('admin');
+
+    Route::get('/admin/dashboard/stats', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard.stats');
+    Route::get('/admin/dashboard/generatePDF', [AdminDashboardController::class, 'generatePDFData'])->name('admin.generatePDFData');
 
     Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.table');
     Route::get('/admin/users/list', [UserController::class, 'list'])->name('admin.users.list');

@@ -12,4 +12,9 @@ class ReservedMaterial extends Model
         'reserved_event_id',
         'material_id',
     ];
+
+    public function material()
+    {
+        return $this->belongsTo(Material::class, 'material_id', 'material_id');
+    }
 }

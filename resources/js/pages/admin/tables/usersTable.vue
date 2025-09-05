@@ -32,6 +32,7 @@
                 title="Edit User"
                 :fields="userFields"
                 v-model="selectedUser"
+                :columns="1"
                 @close="showEditModal = false"
                 @save="updateUser"
             >

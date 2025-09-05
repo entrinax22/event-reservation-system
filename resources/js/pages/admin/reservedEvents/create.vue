@@ -17,7 +17,7 @@
       >
         <h2 class="font-orbitron text-xl text-[#00f5a0]">Create New Reservation</h2>
 
-        <div class="grid grid-cols-1 gap-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Select User -->
           <div>
             <label class="block text-sm text-[#7fbfb0]">Select User</label>
@@ -105,21 +105,8 @@
             <p v-if="errors.downpayment_amount" class="mt-1 text-xs text-red-400">{{ errors.downpayment_amount[0] }}</p>
           </div>
 
-          <!-- Notes -->
-          <div>
-            <label for="event_notes" class="block text-sm text-[#7fbfb0]">Event Notes</label>
-            <textarea
-              id="event_notes"
-              v-model="form.event_notes"
-              class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-              rows="3"
-              placeholder="Additional notes..."
-            ></textarea>
-            <p v-if="errors.event_notes" class="mt-1 text-xs text-red-400">{{ errors.event_notes[0] }}</p>
-          </div>
-
           <!-- Status -->
-          <div>
+          <div >
             <label for="status" class="block text-sm text-[#7fbfb0]">Status</label>
             <select
               id="status"
@@ -135,17 +122,33 @@
             </select>
             <p v-if="errors.status" class="mt-1 text-xs text-red-400">{{ errors.status[0] }}</p>
           </div>
-        </div>
 
-        <!-- Submit button -->
-        <button
-          type="submit"
-          :disabled="submitting"
-          class="w-full rounded bg-[#00f5a0] px-4 py-2 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {{ submitting ? 'Creating...' : 'Create Reservation' }}
-        </button>
+          <!-- Notes (full width) -->
+          <div class="md:col-span-2">
+            <label for="event_notes" class="block text-sm text-[#7fbfb0]">Event Notes</label>
+            <textarea
+              id="event_notes"
+              v-model="form.event_notes"
+              class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
+              rows="3"
+              placeholder="Additional notes..."
+            ></textarea>
+            <p v-if="errors.event_notes" class="mt-1 text-xs text-red-400">{{ errors.event_notes[0] }}</p>
+          </div>
+
+          <!-- Submit button (full width) -->
+          <div class="md:col-span-2">
+            <button
+              type="submit"
+              :disabled="submitting"
+              class="w-full rounded bg-[#00f5a0] px-4 py-2 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {{ submitting ? 'Creating...' : 'Create Reservation' }}
+            </button>
+          </div>
+        </div>
       </form>
+
     </section>
   </AdminLayout>
 </template>

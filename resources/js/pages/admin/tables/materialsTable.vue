@@ -57,6 +57,7 @@
                 title="Edit Material"
                 :fields="materialFields"
                 v-model="selectedMaterial"
+                :columns="1"
                 @close="showEditModal = false"
                 @save="updateMaterial"
             />

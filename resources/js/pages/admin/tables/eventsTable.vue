@@ -50,6 +50,7 @@
                 title="Edit Event"
                 :fields="eventFields"
                 v-model="selectedEvent"
+                :columns="1"
                 @close="showEditModal = false"
                 @save="updateEvent"
             />
