@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\ReservedEvent;
 use App\Models\ReservedMaterial;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingConfirmationMail;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ReservedEventController extends Controller
 {
@@ -53,6 +59,17 @@ class ReservedEventController extends Controller
                 }
             }
 
+            $reservation->load(['user', 'event', 'materials.material']);
+
+            $user = $reservation->user;
+            if ($user && $user->email) {
+                try {
+                    Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
+                } catch (\Exception $mailError) {
+                    Log::error('Mail sending failed: ' . $mailError->getMessage());
+                }
+            }
+
             return response()->json([
                 'result'  => true,
                 'message' => 'Reservation created successfully.',
@@ -73,7 +90,7 @@ class ReservedEventController extends Controller
         try {
             $search = $request->search;
 
-            $query = ReservedEvent::with(['event', 'materials','user']);
+            $query = ReservedEvent::with(['event', 'materials.material','user']);
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -103,11 +120,11 @@ class ReservedEventController extends Controller
                     'event_end_date' => $re->event_end_date,
                     'total_cost' => (float) $re->total_cost,
                     'downpayment_amount' => (float) $re->downpayment_amount,
-                    'materials' => $re->materials->map(function ($m) {
+                    'materials' => $re->materials->map(function ($rm) {
                         return [
-                            'material_id' => $m->material_id,
-                            'material_name' => $m->material_name,
-                            'material_description' => $m->material_description,
+                            'material_id'          => $rm->material?->material_id,
+                            'material_name'        => $rm->material?->material_name,
+                            'material_description' => $rm->material?->material_description,
                         ];
                     }),
                     'status' => $re->status,
@@ -126,7 +143,7 @@ class ReservedEventController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error retrieving reserved events: ' . $e->getMessage(), [
+            Log::error('Error retrieving reserved events: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
 

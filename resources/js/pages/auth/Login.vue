@@ -93,6 +93,10 @@ const submit = () => {
                     <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
                     Log in
                 </button>
+                <a href="/auth/google/redirect" class="btn btn-danger">
+                    <i class="fab fa-google"></i> Login with Google
+                </a>
+
 
                 <!-- Register Link -->
                 <div class="mt-2 text-center text-sm text-gray-400">

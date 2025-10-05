@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\ReservedEventController;
 use App\Http\Controllers\AdminDashboardController;
 
@@ -69,6 +70,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/reserved-events/destroy', [ReservedEventController::class, 'destroy'])->name('admin.reserved-events.destroy');
 });
 
+Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

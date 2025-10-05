@@ -12,7 +12,7 @@
 
       <!-- Create Event Form -->
       <form 
-        @submit.prevent="createReservation" 
+        @submit.prevent.stop="createReservation" 
         class="max-w-3xl space-y-6 rounded-xl bg-[rgba(0,0,0,0.85)] p-6 shadow-xl"
       >
         <h2 class="font-orbitron text-xl text-[#00f5a0]">Create New Reservation</h2>
@@ -211,7 +211,10 @@ async function createReservation() {
       materials: form.value.materials.map(id => ({ material_id: id })) 
     }
 
-    await axios.post(route('admin.reserved-events.store'), payload)
+    await axios.post(route('admin.reserved-events.store'), payload, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      validateStatus: status => status < 400
+    })
     form.value = {
       user_id: '',
       event_date: '',

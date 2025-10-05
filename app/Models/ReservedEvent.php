@@ -26,7 +26,7 @@ class ReservedEvent extends Model
 
     public function materials()
     {
-        return $this->belongsToMany(Material::class, 'reserved_materials', 'reserved_event_id', 'material_id');
+        return $this->hasMany(ReservedMaterial::class, 'reserved_event_id', 'reserved_event_id');
     }
 
     public function user()

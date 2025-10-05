@@ -103,7 +103,7 @@ class AdminDashboardController extends Controller
     {
         try {
             // Fetch all reserved events with related event, user, and materials
-            $reservedEvents = ReservedEvent::with(['event', 'user', 'materials'])->orderBy('event_date', 'desc')->get();
+            $reservedEvents = ReservedEvent::with(['event', 'user', 'materials.material'])->orderBy('event_date', 'desc')->get();
 
             // Transform data for front-end PDF
             $eventData = $reservedEvents->map(function($re) {
@@ -115,8 +115,8 @@ class AdminDashboardController extends Controller
                     'status' => $re->status,
                     'materials' => $re->materials->map(function($m){
                         return [
-                            'name' => $m->material_name,
-                            'description' => $m->material_description,
+                            'name' => $m->material->material_name,
+                            'description' => $m->material->material_description,
                         ];
                     }),
                     'total_cost' => $re->total_cost,
@@ -143,16 +143,17 @@ class AdminDashboardController extends Controller
                 ->take(5)
                 ->values();
 
-            // Most used materials (top 5)
             $materialCounts = [];
             foreach ($reservedEvents as $re) {
-                foreach ($re->materials as $m) {
-                    if (!isset($materialCounts[$m->material_name])) {
-                        $materialCounts[$m->material_name] = 0;
+                foreach ($re->materials as $rm) {
+                    $materialName = $rm->material?->material_name ?? 'Unknown Material';
+                    if (!isset($materialCounts[$materialName])) {
+                        $materialCounts[$materialName] = 0;
                     }
-                    $materialCounts[$m->material_name]++;
+                    $materialCounts[$materialName]++;
                 }
             }
+
             $popularMaterials = collect($materialCounts)
                 ->map(function($count, $name) { return ['material_name' => $name, 'used_count' => $count]; })
                 ->sortByDesc('used_count')
