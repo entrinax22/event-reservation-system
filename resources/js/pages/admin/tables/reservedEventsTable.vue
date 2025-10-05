@@ -157,8 +157,8 @@ async function fetchSelectOptions() {
     try {
         const [usersRes, eventsRes, materialsRes] = await Promise.all([
             axios.get(route('admin.users.selectList')),
-            axios.get(route('admin.events.selectList')),
-            axios.get(route('admin.materials.selectList'))
+            axios.get(route('events.selectList')),
+            axios.get(route('materials.selectList'))
         ])
         
         userOptions.value = usersRes.data.data.map(u => ({ 

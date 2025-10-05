@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\ReservedEvent;
 use App\Models\ReservedMaterial;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingConfirmationMail;
 use Illuminate\Validation\ValidationException;
@@ -99,8 +99,8 @@ class ReservedEventController extends Controller
                         $qe->where('event_name', 'like', '%' . $search . '%')
                         ->orWhere('event_date', 'like', '%' . $search . '%');
                     })
-                    // Search materials
-                    ->orWhereHas('materials', function ($qm) use ($search) {
+                    // Search materials (nested relationship)
+                    ->orWhereHas('materials.material', function ($qm) use ($search) {
                         $qm->where('material_name', 'like', '%' . $search . '%');
                     });
                 });
@@ -272,4 +272,114 @@ class ReservedEventController extends Controller
         }
     }
 
+    public function reservedOnline()
+    {
+        try {
+            $validated = request()->validate([
+                'event_id'               => 'required|exists:events,event_id',
+                'event_date'             => 'required|date',
+                'event_end_date'         => 'required|date|after_or_equal:event_date',
+                'materials'              => 'nullable|array',
+                'materials.*.material_id'=> 'required|exists:materials,material_id',
+                'event_notes'            => 'nullable|string',
+            ]);
+
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'User not authenticated.',
+                ], 401);
+            }
+
+            $start = $validated['event_date'];
+            $end   = $validated['event_end_date'];
+
+            $existingBookings = ReservedEvent::where(function ($q) use ($start, $end) {
+                $q->whereBetween('event_date', [$start, $end])
+                ->orWhereBetween('event_end_date', [$start, $end])
+                ->orWhere(function ($query) use ($start, $end) {
+                    $query->where('event_date', '<=', $start)
+                            ->where('event_end_date', '>=', $end);
+                });
+            })
+            ->whereIn('status', ['pending', 'accepted', 'completed']) 
+            ->count();
+
+            if ($existingBookings >= 2) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Booking unavailable — there are already 2 or more booked events on the selected date range.',
+                ], 409);
+            }
+
+            // ✅ Create new reservation if available
+            $reservation = ReservedEvent::create([
+                'user_id'      => $user->user_id,
+                'event_date'   => $validated['event_date'],
+                'event_end_date'=> $validated['event_end_date'],
+                'event_id'     => $validated['event_id'],
+                'event_notes'  => $validated['event_notes'] ?? null,
+                'status'       => 'pending',
+            ]);
+
+            if (!empty($validated['materials'])) {
+                foreach ($validated['materials'] as $material) {
+                    ReservedMaterial::create([
+                        'reserved_event_id' => $reservation->reserved_event_id,
+                        'material_id'       => $material['material_id'],
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'result'  => true,
+                'message' => 'Event booked successfully. Please wait for admin confirmation.',
+                'data'    => $reservation,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while booking the event.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    public function eventsList(){
+        try{
+            $reservedEvents = ReservedEvent::with(['event', 'user'])
+                ->orderBy('event_date', 'asc')
+                ->get();
+
+            $data = $reservedEvents->map(function ($re) {
+                return [
+                    'user' => [
+                        'user_id' => $re->user?->user_id,
+                        'name'    => $re->user?->name,
+                        'email'   => $re->user?->email,
+                    ],
+                    'reserved_event_id' => $re->reserved_event_id,
+                    'event_id' => $re->event_id,
+                    'event_name' => $re->event?->event_name,
+                    'event_date' => $re->event_date,
+                    'event_end_date' => $re->event_end_date,
+                    'status' => $re->status,
+                ];
+            });
+            return response()->json([
+                'result' => true,
+                'message' => 'Events retrieved successfully.',
+                'data' => $data,
+            ]);
+        }catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while fetching the events list.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
