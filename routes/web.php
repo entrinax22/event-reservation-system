@@ -33,6 +33,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/reserved-online', [ReservedEventController::class, 'reservedOnline'])->name('reserved-online');
     Route::get('/events-list', [ReservedEventController::class, 'eventsList'])->name('events-list');
+
+    Route::get('/reservations/my-reservations', [ReservedEventController::class, 'myReservations'])->name('reservations.my-reservations');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {

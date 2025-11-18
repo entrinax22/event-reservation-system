@@ -30,7 +30,7 @@ class ReservedEventController extends Controller
                 'user_id'            => 'required|exists:users,user_id',
                 'event_date'         => 'required|date',
                 'event_end_date'     => 'required|date|after_or_equal:event_date',
-                'event_id'           => 'required|exists:events,event_id',
+                'event_id'           => 'required|exists:event_id',
                 'materials'          => 'nullable|array',
                 'materials.*.material_id' => 'required|exists:materials,material_id',
                 'total_cost'         => 'required|numeric|min:0',
@@ -378,6 +378,36 @@ class ReservedEventController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => 'An error occurred while fetching the events list.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function myReservations(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'User not authenticated.',
+                ], 401);
+            }
+
+            $reservations = ReservedEvent::with(['event', 'materials.material'])
+                ->where('user_id', $user->user_id)
+                ->orderBy('reserved_event_id', 'asc')
+                ->get();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'User reservations retrieved successfully.',
+                'data' => $reservations,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while fetching user reservations.',
                 'error'   => $e->getMessage(),
             ], 500);
         }
