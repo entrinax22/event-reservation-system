@@ -213,7 +213,16 @@ class ReservedEventController extends Controller
             }
 
             // Reload with relationships
-            $reservedEvent->load('materials');
+            $reservedEvent->load('materials', 'user');
+
+            // $user = $reservedEvent->user;
+            // if ($user && $user->email) {
+            //     try {
+            //         Mail::to($user->email)->send(new BookingConfirmationMail($reservedEvent));
+            //     } catch (\Exception $mailError) {
+            //         Log::error('Mail sending failed: ' . $mailError->getMessage());
+            //     }
+            // }
 
             return response()->json([
                 'result'  => true,
@@ -329,6 +338,15 @@ class ReservedEventController extends Controller
                         'reserved_event_id' => $reservation->reserved_event_id,
                         'material_id'       => $material['material_id'],
                     ]);
+                }
+            }
+
+            $user = $reservation->user;
+            if ($user && $user->email) {
+                try {
+                    Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
+                } catch (\Exception $mailError) {
+                    Log::error('Mail sending failed: ' . $mailError->getMessage());
                 }
             }
 
