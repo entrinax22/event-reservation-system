@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\ReservedEventController;
 use App\Http\Controllers\AdminDashboardController;
@@ -74,6 +75,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/reserved-events/store', [ReservedEventController::class, 'store'])->name('admin.reserved-events.store');
     Route::post('/admin/reserved-events/update', [ReservedEventController::class, 'update'])->name('admin.reserved-events.update');
     Route::post('/admin/reserved-events/destroy', [ReservedEventController::class, 'destroy'])->name('admin.reserved-events.destroy');
+
+    Route::get('/admin/payments', [PaymentsController::class, 'index'])->name('admin.payments.table');
+    Route::get('/admin/payments/create', [PaymentsController::class, 'create'])->name('admin.payments.create');
+    Route::get('/admin/payments/list', [PaymentsController::class, 'list'])->name('admin.payments.list');
+    Route::post('/admin/payments/store', [PaymentsController::class, 'store'])->name('admin.payments.store');
+    Route::post('/admin/payments/update', [PaymentsController::class, 'update'])->name('admin.payments.update');
+    Route::post('/admin/payments/destroy', [PaymentsController::class, 'destroy'])->name('admin.payments.destroy');
 });
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');

@@ -1,27 +1,27 @@
 <!-- components/BaseTable.vue -->
 <template>
-    <div class="card rounded-2xl border border-black/30 bg-[rgba(0,0,0,0.85)] p-3 md:p-6 shadow-xl">
+    <div class="card rounded-2xl border border-black/30 bg-[rgba(0,0,0,0.85)] p-3 shadow-xl md:p-6">
         <!-- Toolbar -->
-        <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2" v-if="$slots.toolbar">
+        <div class="mb-4 flex flex-col items-start space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2" v-if="$slots.toolbar">
             <slot name="toolbar" />
         </div>
 
         <!-- Title -->
-        <h3 class="font-orbitron mb-4 text-lg md:text-xl text-[#00f5a0]">{{ title }}</h3>
+        <h3 class="font-orbitron mb-4 text-lg text-[#00f5a0] md:text-xl">{{ title }}</h3>
 
         <!-- Desktop Table View -->
-        <div class="hidden lg:block overflow-x-auto">
-            <table class="w-full text-left text-sm text-white min-w-full">
+        <div class="hidden overflow-x-auto lg:block">
+            <table class="w-full min-w-full text-left text-sm text-white">
                 <thead class="border-b border-gray-700 text-[#7fbfb0]">
                     <tr>
-                        <th v-for="col in columns" :key="col.key" class="py-3 px-2 whitespace-nowrap">
+                        <th v-for="col in columns" :key="col.key" class="px-2 py-3 whitespace-nowrap">
                             {{ col.label }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(row, index) in data" :key="row.id || index" class="border-b border-gray-700 hover:bg-gray-800/40">
-                        <td v-for="col in columns" :key="col.key" class="py-3 px-2">
+                        <td v-for="col in columns" :key="col.key" class="px-2 py-3">
                             <template v-if="col.key === 'actions'">
                                 <slot name="actions" :row="row" :index="index"> </slot>
                             </template>
@@ -43,19 +43,15 @@
         </div>
 
         <!-- Mobile/Tablet Card View -->
-        <div class="lg:hidden space-y-4">
-            <div v-for="(row, index) in data" :key="row.id || index" 
-                 class="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
-                
+        <div class="space-y-4 lg:hidden">
+            <div v-for="(row, index) in data" :key="row.id || index" class="rounded-lg border border-gray-700 bg-gray-800/40 p-4">
                 <!-- Row cards for mobile -->
                 <div class="space-y-3">
                     <template v-for="col in columns" :key="col.key">
                         <!-- Skip actions column in main content, we'll add it at bottom -->
                         <div v-if="col.key !== 'actions'" class="flex flex-col sm:flex-row sm:justify-between">
-                            <dt class="text-sm font-medium text-[#7fbfb0] mb-1 sm:mb-0">
-                                {{ col.label }}:
-                            </dt>
-                            <dd class="text-sm text-white sm:text-right flex-1 sm:ml-4">
+                            <dt class="mb-1 text-sm font-medium text-[#7fbfb0] sm:mb-0">{{ col.label }}:</dt>
+                            <dd class="flex-1 text-sm text-white sm:ml-4 sm:text-right">
                                 <template v-if="$slots[`cell-${col.key}`]">
                                     <slot :name="`cell-${col.key}`" :value="row[col.key]" :row="row" :index="index" />
                                 </template>
@@ -70,9 +66,9 @@
                             </dd>
                         </div>
                     </template>
-                    
+
                     <!-- Actions at bottom of each card -->
-                    <div class="pt-3 border-t border-gray-600 flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2 border-t border-gray-600 pt-3">
                         <slot name="actions" :row="row" :index="index"> </slot>
                     </div>
                 </div>
@@ -80,18 +76,21 @@
         </div>
 
         <!-- No data message -->
-        <div v-if="!data || data.length === 0" class="text-center py-8 text-gray-400">
+        <div v-if="!data || data.length === 0" class="py-8 text-center text-gray-400">
             <p>No data available</p>
         </div>
 
         <!-- Pagination -->
-        <div v-if="pagination && data && data.length > 0" class="mt-6 flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-2 text-sm">
+        <div
+            v-if="pagination && data && data.length > 0"
+            class="mt-6 flex flex-col items-center justify-center space-y-2 text-sm sm:flex-row sm:space-y-0 sm:space-x-2"
+        >
             <!-- Mobile: Stack buttons vertically on very small screens -->
             <div class="flex flex-wrap justify-center gap-2">
                 <button
                     @click="$emit('page-changed', pagination.current_page - 1)"
                     :disabled="pagination.current_page === 1"
-                    class="rounded-full bg-[#00f5a0] px-3 sm:px-4 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400"
+                    class="rounded-full bg-[#00f5a0] px-3 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400 sm:px-4"
                     aria-label="Previous Page"
                 >
                     Prev
@@ -103,7 +102,7 @@
                     :key="page"
                     @click="$emit('page-changed', page)"
                     :class="[
-                        'rounded-full px-3 sm:px-4 py-1 font-semibold text-xs sm:text-sm',
+                        'rounded-full px-3 py-1 text-xs font-semibold sm:px-4 sm:text-sm',
                         page === pagination.current_page ? 'cursor-default bg-[#00f5a0] text-black' : 'bg-black/40 text-white hover:bg-[#00c88a]',
                     ]"
                     :aria-current="page === pagination.current_page ? 'page' : null"
@@ -114,17 +113,15 @@
                 <button
                     @click="$emit('page-changed', pagination.current_page + 1)"
                     :disabled="pagination.current_page === pagination.last_page"
-                    class="rounded-full bg-[#00f5a0] px-3 sm:px-4 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400"
+                    class="rounded-full bg-[#00f5a0] px-3 py-1 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:bg-gray-400 sm:px-4"
                     aria-label="Next Page"
                 >
                     Next
                 </button>
             </div>
-            
+
             <!-- Pagination info -->
-            <div class="text-xs text-gray-400 mt-2 sm:mt-0">
-                Page {{ pagination.current_page }} of {{ pagination.last_page }}
-            </div>
+            <div class="mt-2 text-xs text-gray-400 sm:mt-0">Page {{ pagination.current_page }} of {{ pagination.last_page }}</div>
         </div>
     </div>
 </template>
@@ -168,10 +165,10 @@ const pageNumbersToShow = computed(() => {
 
     const total = props.pagination.last_page;
     const current = props.pagination.current_page;
-    
+
     // Responsive page count - fewer on mobile
     const maxPagesToShow = window.innerWidth < 640 ? 3 : 5;
-    
+
     let start = Math.max(current - Math.floor(maxPagesToShow / 2), 1);
     let end = start + maxPagesToShow - 1;
 

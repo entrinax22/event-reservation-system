@@ -263,7 +263,7 @@ class ReservedEventController extends Controller
             $reservedEvent = ReservedEvent::with('materials')
                 ->findOrFail($validated['reserved_event_id']);
 
-            $reservedEvent->materials()->detach();
+            $reservedEvent->materials()->delete();
 
             $reservedEvent->delete();
 

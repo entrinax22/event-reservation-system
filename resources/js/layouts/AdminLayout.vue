@@ -47,6 +47,7 @@
                                     <Link :href="route('admin.events.table')" class="sidebar-link">Events Table</Link>
                                     <Link :href="route('admin.materials.table')" class="sidebar-link">Materials Table</Link>
                                     <Link :href="route('admin.reserved-events.table')" class="sidebar-link">Reserved Events Table</Link>
+                                    <Link :href="route('admin.payments.table')" class="sidebar-link">Payments Table</Link>
                                 </div>
                             </div>
                         </nav>
@@ -70,8 +71,8 @@
         </transition>
 
         <!-- Main content -->
-        <main class="min-h-screen flex-1 md:ml-0 overflow-x-auto overflow-y-auto">
-            <div class="p-4 md:p-10 min-w-full">
+        <main class="min-h-screen flex-1 overflow-x-auto overflow-y-auto md:ml-0">
+            <div class="min-w-full p-4 md:p-10">
                 <slot />
             </div>
         </main>
