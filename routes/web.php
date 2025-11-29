@@ -7,6 +7,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ReservedEventController;
 use App\Http\Controllers\AdminDashboardController;
 
@@ -36,12 +37,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events-list', [ReservedEventController::class, 'eventsList'])->name('events-list');
 
     Route::get('/reservations/my-reservations', [ReservedEventController::class, 'myReservations'])->name('reservations.my-reservations');
+    Route::post('/reservations/cancel', [ReservedEventController::class, 'cancelReservation'])->name('reservations.cancel');
+
+    Route::get('/reservations/user/reservation/{reserved_event_id}', [ReservedEventController::class, 'reservedEventData'])->name('reservations.user.reservation');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', function () {
         return Inertia::render('admin/AdminDashboard');
     })->name('admin');
+    
+    Route::get('/admin/notifications', function () {
+        return Inertia::render('admin/notifications/notifications');
+    })->name('notifications.admin');
 
     Route::get('/admin/dashboard/stats', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard.stats');
     Route::get('/admin/dashboard/generatePDF', [AdminDashboardController::class, 'generatePDFData'])->name('admin.generatePDFData');
@@ -86,6 +94,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+Route::get('/notifications/unread-count', [NotificationsController::class, 'unreadCount'])->name('notifications.unread-count');
+Route::get('/notifications/list', [NotificationsController::class, 'index'])->name('notifications.index');
+Route::post('/notifications/mark-as-read/{id}', [NotificationsController::class, 'markAsRead'])->name('notifications.mark-as-read');
+Route::post('/notifications/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

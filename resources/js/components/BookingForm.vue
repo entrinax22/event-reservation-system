@@ -1,78 +1,163 @@
 <template>
-    <!-- Modal Overlay -->
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-        <!-- Modal Box -->
-        <div class="relative w-full max-w-3xl rounded-xl border border-gray-700 bg-[rgba(0,0,0,0.85)] p-6 shadow-2xl">
-            <!-- Close Button -->
-            <button @click="$emit('close')" class="absolute top-4 right-4 text-gray-400 transition hover:text-[#00f5a0]">✕</button>
+    <div
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-300"
+        @click.self="$emit('close')"
+    >
+        <div
+            class="relative w-full max-w-2xl transform overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0a] shadow-[0_0_50px_rgba(0,245,160,0.1)] transition-all duration-300 sm:p-0"
+        >
+            <div class="relative flex items-center justify-between border-b border-white/5 bg-[#111] px-8 py-6">
+                <div>
+                    <h2 class="font-orbitron text-xl font-bold tracking-wide text-white">Create Reservation</h2>
+                    <p class="mt-1 text-xs text-gray-500">Fill in the details below to book a new event.</p>
+                </div>
+                <button
+                    @click="$emit('close')"
+                    class="group flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition hover:bg-red-500/20 hover:text-red-400"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 text-gray-400 group-hover:text-red-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
-            <!-- Title -->
-            <h2 class="font-orbitron mb-4 text-center text-2xl text-[#00f5a0]">Create New Reservation</h2>
+            <div class="max-h-[85vh] overflow-y-auto px-8 py-8">
+                <form @submit.prevent="createReservation" class="space-y-6">
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div class="group relative">
+                            <label
+                                class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase transition-colors group-focus-within:text-[#00f5a0]"
+                                >Start Date</label
+                            >
+                            <div class="relative flex items-center">
+                                <input
+                                    type="date"
+                                    v-model="form.event_date"
+                                    class="peer w-full rounded-xl border border-white/10 bg-[#151515] px-4 py-3 text-sm text-white placeholder-transparent shadow-sm transition-all focus:border-[#00f5a0] focus:bg-black focus:ring-1 focus:ring-[#00f5a0] focus:outline-none"
+                                    required
+                                />
+                                <div class="pointer-events-none absolute right-4 text-gray-400 peer-focus:text-[#00f5a0]">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p v-if="errors.event_date" class="mt-1 text-xs font-medium text-red-500">{{ errors.event_date[0] }}</p>
+                        </div>
 
-            <!-- Form -->
-            <form @submit.prevent="createReservation" class="space-y-6">
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <!-- Event Date -->
-                    <div>
-                        <label class="block text-sm text-[#7fbfb0]">Event Date</label>
-                        <input
-                            type="date"
-                            v-model="form.event_date"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            required
-                        />
-                        <p v-if="errors.event_date" class="mt-1 text-xs text-red-400">{{ errors.event_date[0] }}</p>
+                        <div class="group relative">
+                            <label
+                                class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase transition-colors group-focus-within:text-[#00f5a0]"
+                                >End Date</label
+                            >
+                            <div class="relative flex items-center">
+                                <input
+                                    type="date"
+                                    v-model="form.event_end_date"
+                                    class="peer w-full rounded-xl border border-white/10 bg-[#151515] px-4 py-3 text-sm text-white placeholder-transparent shadow-sm transition-all focus:border-[#00f5a0] focus:bg-black focus:ring-1 focus:ring-[#00f5a0] focus:outline-none"
+                                    required
+                                />
+                                <div class="pointer-events-none absolute right-4 text-gray-400 peer-focus:text-[#00f5a0]">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p v-if="errors.event_end_date" class="mt-1 text-xs font-medium text-red-500">{{ errors.event_end_date[0] }}</p>
+                        </div>
                     </div>
 
-                    <!-- Event End Date -->
-                    <div>
-                        <label class="block text-sm text-[#7fbfb0]">Event End Date</label>
-                        <input
-                            type="date"
-                            v-model="form.event_end_date"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            required
-                        />
-                        <p v-if="errors.event_end_date" class="mt-1 text-xs text-red-400">{{ errors.event_end_date[0] }}</p>
+                    <div class="group">
+                        <label class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase">Select Event</label>
+                        <div class="relative">
+                            <BaseSelect
+                                v-model="form.event_id"
+                                :options="eventOptions"
+                                placeholder="Choose an event type..."
+                                class="custom-select-override"
+                            />
+                        </div>
+                        <p v-if="errors.event_id" class="mt-1 text-xs font-medium text-red-500">{{ errors.event_id[0] }}</p>
                     </div>
 
-                    <!-- Select Event -->
-                    <div>
-                        <label class="block text-sm text-[#7fbfb0]">Select Event</label>
-                        <BaseSelect v-model="form.event_id" :options="eventOptions" placeholder="Choose an event" />
-                        <p v-if="errors.event_id" class="mt-1 text-xs text-red-400">{{ errors.event_id[0] }}</p>
+                    <div class="group">
+                        <label class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase">Materials Needed</label>
+                        <div class="relative">
+                            <BaseSelect
+                                v-model="form.materials"
+                                :options="materialOptions"
+                                multiple
+                                placeholder="Select materials..."
+                                class="custom-select-override"
+                            />
+                        </div>
+                        <p v-if="errors.materials" class="mt-1 text-xs font-medium text-red-500">{{ errors.materials[0] }}</p>
                     </div>
 
-                    <!-- Select Materials -->
-                    <div>
-                        <label class="block text-sm text-[#7fbfb0]">Select Materials</label>
-                        <BaseSelect v-model="form.materials" :options="materialOptions" multiple placeholder="Choose materials" />
-                        <p v-if="errors.materials" class="mt-1 text-xs text-red-400">{{ errors.materials[0] }}</p>
-                    </div>
-
-                    <!-- Notes -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm text-[#7fbfb0]">Event Notes</label>
+                    <div class="group">
+                        <label
+                            class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase transition-colors group-focus-within:text-[#00f5a0]"
+                            >Notes</label
+                        >
                         <textarea
                             v-model="form.event_notes"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
                             rows="3"
-                            placeholder="Additional notes..."
+                            placeholder="Any special requirements or details..."
+                            class="w-full rounded-xl border border-white/10 bg-[#151515] px-4 py-3 text-sm text-white placeholder-gray-600 shadow-sm transition-all focus:border-[#00f5a0] focus:bg-black focus:ring-1 focus:ring-[#00f5a0] focus:outline-none"
                         ></textarea>
                     </div>
-                </div>
 
-                <!-- Submit -->
-                <div class="pt-4">
-                    <button
-                        type="submit"
-                        :disabled="submitting"
-                        class="w-full rounded bg-[#00f5a0] px-4 py-2 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {{ submitting ? 'Creating...' : 'Create Reservation' }}
-                    </button>
-                </div>
-            </form>
+                    <div class="pt-2">
+                        <button
+                            type="submit"
+                            :disabled="submitting"
+                            class="relative w-full overflow-hidden rounded-xl bg-[#00f5a0] py-3.5 text-sm font-bold tracking-wider text-black uppercase transition-all hover:bg-[#00d68f] hover:shadow-[0_0_20px_rgba(0,245,160,0.4)] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <span v-if="!submitting">Confirm Reservation</span>
+                            <span v-else class="flex items-center justify-center gap-2">
+                                <svg class="h-4 w-4 animate-spin text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
+                                </svg>
+                                Processing...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </template>
@@ -101,19 +186,11 @@ async function fetchOptions() {
     try {
         const [eventsRes, materialsRes] = await Promise.all([axios.get(route('events.selectList')), axios.get(route('materials.selectList'))]);
 
-        // ✅ Safe fallback for both {data: []} or []
         const eventsData = eventsRes.data?.data ?? eventsRes.data ?? [];
         const materialsData = materialsRes.data?.data ?? materialsRes.data ?? [];
 
-        eventOptions.value = eventsData.map((e) => ({
-            value: e.event_id,
-            label: e.event_name,
-        }));
-
-        materialOptions.value = materialsData.map((m) => ({
-            value: m.material_id,
-            label: m.material_name,
-        }));
+        eventOptions.value = eventsData.map((e) => ({ value: e.event_id, label: e.event_name }));
+        materialOptions.value = materialsData.map((m) => ({ value: m.material_id, label: m.material_name }));
     } catch (err) {
         console.error('Error fetching select lists:', err);
         eventOptions.value = [];
@@ -157,5 +234,23 @@ async function createReservation() {
 <style scoped>
 .font-orbitron {
     font-family: 'Orbitron', sans-serif;
+}
+
+/* Date Picker Customization Magic 
+   We hide the native ugly indicator but keep the input functionality.
+   This allows the user to click anywhere on the input (including our custom SVG icon area)
+   to trigger the native browser date picker.
+*/
+input[type='date']::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
 }
 </style>

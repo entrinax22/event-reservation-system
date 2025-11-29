@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\ReservedEvent;
@@ -11,6 +12,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingConfirmationMail;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\CancelReservationNotification;
+use App\Notifications\ReservationCreatedNotification;
+use App\Notifications\AdminNewReservationNotification;
+use App\Notifications\NewUpdateReservationNotification;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ReservedEventController extends Controller
@@ -30,7 +35,7 @@ class ReservedEventController extends Controller
                 'user_id'            => 'required|exists:users,user_id',
                 'event_date'         => 'required|date',
                 'event_end_date'     => 'required|date|after_or_equal:event_date',
-                'event_id'           => 'required|exists:event_id',
+                'event_id'           => 'required|exists:events,event_id',
                 'materials'          => 'nullable|array',
                 'materials.*.material_id' => 'required|exists:materials,material_id',
                 'total_cost'         => 'required|numeric|min:0',
@@ -62,8 +67,16 @@ class ReservedEventController extends Controller
             $reservation->load(['user', 'event', 'materials.material']);
 
             $user = $reservation->user;
+            $user->notify(new ReservationCreatedNotification($reservation));
+
+            $admins = User::where('role', 'admin')->get();
+            foreach($admins as $admin){
+                $admin->notify(new AdminNewReservationNotification($reservation));
+            }
+            
             if ($user && $user->email) {
                 try {
+                    
                     Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
                 } catch (\Exception $mailError) {
                     Log::error('Mail sending failed: ' . $mailError->getMessage());
@@ -214,15 +227,18 @@ class ReservedEventController extends Controller
 
             // Reload with relationships
             $reservedEvent->load('materials', 'user');
-
-            // $user = $reservedEvent->user;
-            // if ($user && $user->email) {
-            //     try {
-            //         Mail::to($user->email)->send(new BookingConfirmationMail($reservedEvent));
-            //     } catch (\Exception $mailError) {
-            //         Log::error('Mail sending failed: ' . $mailError->getMessage());
-            //     }
-            // }
+            
+            $user = $reservedEvent->user;
+            $user->notify(new NewUpdateReservationNotification($reservedEvent));
+            
+            if ($user && $user->email) {
+                try {
+                    
+                    // Mail::to($user->email)->send(new BookingConfirmationMail($reservedEvent));
+                } catch (\Exception $mailError) {
+                    Log::error('Mail sending failed: ' . $mailError->getMessage());
+                }
+            }
 
             return response()->json([
                 'result'  => true,
@@ -285,12 +301,12 @@ class ReservedEventController extends Controller
     {
         try {
             $validated = request()->validate([
-                'event_id'               => 'required|exists:events,event_id',
-                'event_date'             => 'required|date',
-                'event_end_date'         => 'required|date|after_or_equal:event_date',
-                'materials'              => 'nullable|array',
-                'materials.*.material_id'=> 'required|exists:materials,material_id',
-                'event_notes'            => 'nullable|string',
+                'event_id'                => 'required|exists:events,event_id',
+                'event_date'              => 'required|date',
+                'event_end_date'          => 'required|date|after_or_equal:event_date',
+                'materials'               => 'nullable|array',
+                'materials.*.material_id' => 'required|exists:materials,material_id',
+                'event_notes'             => 'nullable|string',
             ]);
 
             $user = Auth::user();
@@ -305,15 +321,15 @@ class ReservedEventController extends Controller
             $end   = $validated['event_end_date'];
 
             $existingBookings = ReservedEvent::where(function ($q) use ($start, $end) {
-                $q->whereBetween('event_date', [$start, $end])
-                ->orWhereBetween('event_end_date', [$start, $end])
-                ->orWhere(function ($query) use ($start, $end) {
-                    $query->where('event_date', '<=', $start)
-                            ->where('event_end_date', '>=', $end);
-                });
-            })
-            ->whereIn('status', ['pending', 'accepted', 'completed']) 
-            ->count();
+                    $q->whereBetween('event_date', [$start, $end])
+                    ->orWhereBetween('event_end_date', [$start, $end])
+                    ->orWhere(function ($query) use ($start, $end) {
+                        $query->where('event_date', '<=', $start)
+                                ->where('event_end_date', '>=', $end);
+                    });
+                })
+                ->whereIn('status', ['pending', 'accepted'])
+                ->count();
 
             if ($existingBookings >= 2) {
                 return response()->json([
@@ -322,14 +338,13 @@ class ReservedEventController extends Controller
                 ], 409);
             }
 
-            // ✅ Create new reservation if available
             $reservation = ReservedEvent::create([
-                'user_id'      => $user->user_id,
-                'event_date'   => $validated['event_date'],
+                'user_id'       => $user->user_id,
+                'event_date'    => $validated['event_date'],
                 'event_end_date'=> $validated['event_end_date'],
-                'event_id'     => $validated['event_id'],
-                'event_notes'  => $validated['event_notes'] ?? null,
-                'status'       => 'pending',
+                'event_id'      => $validated['event_id'],
+                'event_notes'   => $validated['event_notes'] ?? null,
+                'status'        => 'pending',
             ]);
 
             if (!empty($validated['materials'])) {
@@ -341,8 +356,16 @@ class ReservedEventController extends Controller
                 }
             }
 
-            $user = $reservation->user;
-            if ($user && $user->email) {
+            // STORE NOTIFICATION
+            $user->notify(new ReservationCreatedNotification($reservation));
+
+            $admins = User::where('role', 'admin')->get();
+            foreach($admins as $admin){
+                $admin->notify(new AdminNewReservationNotification($reservation));
+            }
+            
+            // SEND EMAIL
+            if ($user->email) {
                 try {
                     Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
                 } catch (\Exception $mailError) {
@@ -364,6 +387,7 @@ class ReservedEventController extends Controller
             ], 500);
         }
     }
+
 
 
     public function eventsList(){
@@ -414,7 +438,7 @@ class ReservedEventController extends Controller
 
             $reservations = ReservedEvent::with(['event', 'materials.material'])
                 ->where('user_id', $user->user_id)
-                ->orderBy('reserved_event_id', 'asc')
+                ->orderBy('reserved_event_id', 'desc')
                 ->get();
 
             return response()->json([
@@ -426,6 +450,72 @@ class ReservedEventController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => 'An error occurred while fetching user reservations.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function cancelReservation(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'User not authenticated.',
+                ], 401);
+            }
+
+            $validated = $request->validate([
+                'reserved_event_id' => 'required|exists:reserved_events,reserved_event_id',
+            ]);
+
+            $reservation = ReservedEvent::where('reserved_event_id', $validated['reserved_event_id'])
+                ->where('user_id', $user->user_id)
+                ->first();
+
+            if (!$reservation) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Reservation not found for this user.',
+                ], 404);
+            }
+
+            $reservation->status = 'cancelled';
+            $reservation->save();
+
+            $user = $reservation->user;
+
+            $user->notify(new CancelReservationNotification($reservation));
+            
+            return response()->json([
+                'result' => true,
+                'message' => 'Reservation cancelled successfully.',
+                'data' => $reservation,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while cancelling the reservation.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function reservedEventData($reserved_event_id){
+        try{
+            $reservation = ReservedEvent::where('reserved_event_id', $reserved_event_id)->firstOrFail();
+
+            $reservation->load(['materials','materials.material','user', 'event']);
+            
+            return response()->json([
+                'result' => true,
+                'data' => $reservation
+            ]);
+        }catch(\Exception $e){
+            return response()->json([
+                'result'  => false,
+                'message' => 'An error occurred while fetching the reservation.',
                 'error'   => $e->getMessage(),
             ], 500);
         }

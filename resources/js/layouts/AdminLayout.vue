@@ -36,6 +36,15 @@
                                 <div class="mt-2 flex flex-col gap-2">
                                     <Link :href="route('home')" class="sidebar-link">Home</Link>
                                     <Link :href="route('admin')" class="sidebar-link">Dashboard</Link>
+                                    <Link :href="route('notifications.admin')" class="sidebar-link relative">
+                                        Notifications
+                                        <span
+                                            v-if="count > 0"
+                                            class="absolute top-1 right-4 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff007a] text-[10px] font-bold text-white"
+                                        >
+                                            {{ count }}
+                                        </span>
+                                    </Link>
                                 </div>
                             </div>
 
@@ -84,11 +93,11 @@
 
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
+import axios from 'axios';
 import { onMounted, onUnmounted, ref } from 'vue';
-
 const page = usePage();
 const user = page.props.auth.user || null;
-
+const count = ref(0);
 const sidebarOpen = ref(false);
 const isDesktop = ref(false);
 
@@ -104,11 +113,23 @@ const handleResize = () => {
 onMounted(() => {
     handleResize();
     window.addEventListener('resize', handleResize);
+    fetchCount();
 });
 
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
 });
+
+const fetchCount = async () => {
+    try {
+        const response = await axios.get(route('notifications.unread-count'));
+        if (response.data.result) {
+            count.value = response.data.unread_count;
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
 </script>
 
 <style scoped>

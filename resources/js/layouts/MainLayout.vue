@@ -30,7 +30,16 @@
                         <Link v-if="user.role === 'admin'" :href="route('admin')" class="block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60"
                             >Admin Dashboard</Link
                         >
-                        <Link :href="route('notifications')" class="block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60">Notifications</Link>
+                        <Link :href="route('notifications')" class="relative block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60">
+                            Notifications
+                            <span
+                                v-if="count > 0"
+                                class="absolute top-1 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff007a] text-[10px] font-bold text-white"
+                            >
+                                {{ count }}
+                            </span>
+                        </Link>
+
                         <Link :href="route('mybookings')" class="block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60">My Bookings</Link>
                         <Link
                             :href="route('logout')"
@@ -67,7 +76,16 @@
                 <Link v-if="user.role === 'admin'" :href="route('admin')" class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60"
                     >Admin Dashboard</Link
                 >
-                <Link :href="route('notifications')" class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60">Notifications</Link>
+                <Link :href="route('notifications')" class="relative block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60">
+                    Notifications
+                    <span
+                        v-if="count > 0"
+                        class="absolute top-1 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff007a] text-[10px] font-bold text-white"
+                    >
+                        {{ count }}
+                    </span>
+                </Link>
+
                 <Link :href="route('mybookings')" class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60">My Bookings</Link>
                 <Link :href="route('logout')" method="post" as="button" class="block w-full px-4 py-2 text-left text-red-400 hover:bg-black/60"
                     >Logout</Link
@@ -96,14 +114,29 @@
 <script setup>
 import BookingForm from '@/components/BookingForm.vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
-
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
 const page = usePage();
 const user = ref(page.props.auth.user || null);
-
+const count = ref(0);
 const showDropdown = ref(false);
 const showBookingForm = ref(false);
 const mobileMenuOpen = ref(false);
+
+const fetchCount = async () => {
+    try {
+        const response = await axios.get(route('notifications.unread-count'));
+        if (response.data.result) {
+            count.value = response.data.unread_count;
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+onMounted(() => {
+    fetchCount();
+});
 </script>
 
 <style scoped>
