@@ -6,7 +6,7 @@
             <div
                 class="relative flex flex-col items-center gap-8 overflow-hidden rounded-3xl bg-gradient-to-r from-[#00f5a0]/60 to-[#00b2ff]/40 p-12 shadow-2xl backdrop-blur-sm md:flex-row"
             >
-                <!-- Left: Text Content -->
+                <!-- Left: Text -->
                 <div class="space-y-4 text-center md:w-1/2 md:text-left">
                     <h1 class="text-4xl font-bold text-white drop-shadow-md md:text-5xl">Welcome to Big City Pro Audio</h1>
                     <p class="text-lg text-white/80 md:text-xl">Plan & Reserve Your Events Effortlessly</p>
@@ -29,7 +29,7 @@
                     </div>
                 </div>
 
-                <!-- Right: Logo/Image -->
+                <!-- Right: Logo -->
                 <div class="flex justify-center md:w-1/2 md:justify-end">
                     <img src="/images/logo.png" alt="Big City Pro Audio Logo" class="w-64 object-contain md:w-72 lg:w-80" />
                 </div>

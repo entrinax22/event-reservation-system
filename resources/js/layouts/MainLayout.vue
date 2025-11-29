@@ -1,7 +1,7 @@
 <template>
     <div class="flex min-h-screen flex-col items-center bg-gradient-to-br from-[#03d8a0] via-[#04746a] to-[#0b3b36] text-[#00f5a0]">
         <!-- Navbar -->
-        <nav class="mt-6 flex w-full max-w-5xl items-center justify-between rounded-xl bg-black/60 px-6 py-3 shadow-lg backdrop-blur-md">
+        <nav class="z-[100] mt-6 flex w-full max-w-5xl items-center justify-between rounded-xl bg-black/60 px-6 py-3 shadow-lg backdrop-blur-md">
             <!-- Logo -->
             <div class="flex items-center gap-3">
                 <div class="h-11 w-11 flex-shrink-0 rounded-full bg-gradient-to-r from-[#00f5a0] to-[#00b2ff] shadow-[0_0_18px_rgba(0,255,191,0.15)]">
@@ -70,7 +70,7 @@
 
         <!-- Mobile Menu -->
         <transition name="fade">
-            <div v-if="mobileMenuOpen" class="mt-2 w-full max-w-5xl rounded-xl bg-black/80 p-4 md:hidden">
+            <div v-if="mobileMenuOpen" class="z-50 mt-2 w-full max-w-5xl rounded-xl bg-black/80 p-4 md:hidden">
                 <Link class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60" :href="route('home')">Home</Link>
                 <Link class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60" :href="route('business')">Business Details</Link>
                 <Link v-if="user.role === 'admin'" :href="route('admin')" class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60"
