@@ -175,7 +175,7 @@ const cancelReservation = async (booking) => {
                     </button>
 
                     <button
-                        v-if="booking.status && booking.status.toLowerCase() === 'pending' && Number(booking.downpayment_amount) > 0"
+                        v-if="booking.status && booking.status.toLowerCase() === 'downpayment_update' && Number(booking.downpayment_amount) > 0"
                         @click="openPaymentModal(booking)"
                         class="rounded bg-[#00f5a0] px-3 py-2 text-sm text-black hover:bg-[#07c686]"
                     >

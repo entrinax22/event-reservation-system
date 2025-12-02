@@ -40,7 +40,7 @@
                 <div class="mb-4 text-xs text-[#00f5a0]/80">Date: {{ formatDate(selected.created_at) }}</div>
 
                 <!-- Display Reservation Details -->
-                <div v-if="details" class="border-t border-[#00f5a0]/20 pt-4">
+                <div v-if="details && details.event" class="border-t border-[#00f5a0]/20 pt-4">
                     <h4 class="mb-2 text-sm text-[#00f5a0]">Reservation:</h4>
 
                     <div class="mb-1 text-xs text-[#7fbfb0]">Event Date: {{ details.event.event_name }}</div>
