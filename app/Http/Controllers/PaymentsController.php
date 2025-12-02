@@ -146,4 +146,39 @@ class PaymentsController extends Controller
             ]);
         }
     }
+
+    public function payOnline(Request $request){
+        try{
+            $validated = $request->validate([
+                'reserved_event_id' => 'required|numeric',
+                'amount' => 'required|numeric|min:0',
+                'reference_number' => 'required|string|max:255|unique:payments,reference_number',
+                'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            ]);
+
+            $user = Auth()->user();
+
+            $payment = new Payment();
+            $payment->user_id = $user->user_id;
+            $payment->reserved_event_id = $validated['reserved_event_id'];
+            $payment->amount = $validated['amount'];
+            $payment->reference_number = $validated['reference_number'];
+            if($request->hasFile('payment_proof')){
+                $file = $request->file('payment_proof');
+                $path = $file->store('payment_proofs', 'public');
+                $payment->payment_proof = $path;
+            }
+            $payment->save();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Payment stored successfully.'
+            ]);
+        }catch(\Exception $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to store payment: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

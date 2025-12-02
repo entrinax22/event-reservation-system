@@ -38,24 +38,27 @@ const submitPayment = async () => {
         formData.append('reserved_event_id', paymentForm.value.reserved_event_id);
         formData.append('amount', paymentForm.value.amount);
         formData.append('reference_number', paymentForm.value.reference_number);
-
         if (paymentForm.value.payment_proof) {
             formData.append('payment_proof', paymentForm.value.payment_proof);
         }
 
-        const response = await axios.post('/admin/payments/store', formData, {
+        const response = await axios.post('/user/payments/store', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        alert(response.data.message);
+        // Always show the correct message
+        alert(response.data.message || response.data.msg || 'Payment submitted successfully.');
+
         closePaymentModal();
         fetchBookings();
     } catch (error) {
         if (error.response?.status === 422) {
+            // validation errors
             const errors = error.response.data.errors;
             const messages = Object.values(errors).flat().join('\n');
             alert(messages);
         } else {
+            // other errors
             alert(error.response?.data?.message || 'Something went wrong.');
         }
     }

@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/reservations/cancel', [ReservedEventController::class, 'cancelReservation'])->name('reservations.cancel');
 
     Route::get('/reservations/user/reservation/{reserved_event_id}', [ReservedEventController::class, 'reservedEventData'])->name('reservations.user.reservation');
+    Route::post('/user/payments/store', [PaymentsController::class, 'store'])->name('user.payments.store');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
