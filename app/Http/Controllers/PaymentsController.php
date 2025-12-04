@@ -35,8 +35,8 @@ class PaymentsController extends Controller
             $data = $payments->getCollection()->map(function($payment){
                 return [
                     'payment_id' => $payment->payment_id,
-                    'user_name' => $payment->user->name,
-                    'event_name' => $payment->reservedEvent->event->event_name,
+                    'user_name' => $payment->user->name ?? null,
+                    'event_name' => $payment->reservedEvent->event->event_name ?? null,
                     'amount' => $payment->amount,
                     'reference_number' => $payment->reference_number,
                     'payment_proof' => $payment->payment_proof ? asset('storage/' . $payment->payment_proof) : null,
