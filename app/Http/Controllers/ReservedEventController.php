@@ -393,7 +393,10 @@ class ReservedEventController extends Controller
 
     public function eventsList(){
         try{
+            $statuses = ['pending', 'accepted', 'downpayment_update', 'completed'];
+
             $reservedEvents = ReservedEvent::with(['event', 'user'])
+                ->whereIn('status', $statuses)
                 ->orderBy('event_date', 'asc')
                 ->get();
 
