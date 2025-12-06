@@ -6,6 +6,11 @@ use Inertia\Inertia;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Models\ReservedEvent;
+use App\Mail\BookingUpdateMail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Notifications\NewUpdateReservationNotification;
 
 class PaymentsController extends Controller
 {
@@ -99,33 +104,67 @@ class PaymentsController extends Controller
         }
     }
 
-    
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'payment_id' => 'required|numeric|exists:payments,payment_id',
+            'status' => 'required|string|in:pending,completed,failed',
+        ]);
 
-    public function update(Request $request){
-        try{
-            $validated = $request->validate([
-                'payment_id' => 'required|numeric|exists:payments,payment_id',
-                'status' => 'required|string|in:pending,completed,failed',
-            ]);
+        DB::beginTransaction();
 
+        try {
             $payment = Payment::findOrFail($validated['payment_id']);
             $payment->status = $validated['status'];
             $payment->save();
 
-            if($validated['status'] === 'completed'){
-                ReservedEvent::where('reserved_event_id', $payment->reserved_event_id)
-                    ->update(['status' => 'accepted']);
+            $booking = ReservedEvent::find($payment->reserved_event_id);
+            if (! $booking) {
+                DB::rollBack();
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Related booking not found.'
+                ], 404);
             }
-            
+
+            if($validated['status'] === 'completed'){
+                $booking->status = 'accepted';
+                $booking->save();
+            }else{
+                $booking->status = 'pending';
+                $booking->save();
+            }
+
+            DB::commit();
+
+            $booking->load(['event', 'materials', 'user']);
+            $user = $booking->user;
+
+            // Send notification (database or in-app) first — prevents duplicate mail if notification sends mail channel
+            if ($user) {
+                $user->notify(new NewUpdateReservationNotification($booking));
+            }
+
+            // Send the mail (queued) only if user has an email and you want a dedicated email
+            if ($user && !empty($user->email)) {
+                try {
+                    Mail::to($user->email)->send(new BookingUpdateMail($booking));
+                } catch (\Exception $mailError) {
+                    Log::error('Mail sending failed: ' . $mailError->getMessage());
+                }
+            }
+
             return response()->json([
                 'result' => true,
                 'message' => 'Payment updated successfully.'
             ]);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Payment update failed: ' . $e->getMessage());
             return response()->json([
-                'status' => 'error',
+                'result' => false,
                 'message' => 'Failed to update payment: ' . $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 

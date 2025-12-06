@@ -6,6 +6,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\ReservedEvent;
+use App\Mail\BookingUpdateMail;
 use App\Models\ReservedMaterial;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -234,7 +235,7 @@ class ReservedEventController extends Controller
             if ($user && $user->email) {
                 try {
                     
-                    // Mail::to($user->email)->send(new BookingConfirmationMail($reservedEvent));
+                    Mail::to($user->email)->send(new BookingUpdateMail($reservedEvent));
                 } catch (\Exception $mailError) {
                     Log::error('Mail sending failed: ' . $mailError->getMessage());
                 }

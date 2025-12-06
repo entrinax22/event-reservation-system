@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Booking Confirmation - Big City Pro</title>
+    <title>Booking Updated - Big City Pro</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -87,12 +87,12 @@
     <div class="email-container">
         <div class="email-header">
             <img src="{{ isset($message) ? $message->embed(public_path('images/logo.png')) : asset('images/logo.png') }}" alt="Big City Pro Logo" style="width:70px;height:70px;border-radius:50%;margin-bottom:10px;">
-            <h2>Big City Pro - Booking Confirmation</h2>
+            <h2>Big City Pro - Booking Updated</h2>
         </div>
         <div class="email-body">
             <p>Hello <strong>{{ $booking->user->name ?? 'Valued Customer' }}</strong>,</p>
 
-            <p>Thank you for choosing <strong>Big City Pro</strong>! Your booking has been successfully received.</p>
+            <p>Thank you for choosing <strong>Big City Pro</strong>! Your booking has been updated. Below are the latest details.</p>
 
             <h3>Booking Details</h3>
             <table class="details-table">
@@ -115,6 +115,10 @@
                 <tr>
                     <th>Status:</th>
                     <td>{{ ucfirst($booking->status) }}</td>
+                </tr>
+                <tr>
+                    <th>Last Updated:</th>
+                    <td>{{ \Carbon\Carbon::parse($booking->updated_at)->format('F d, Y h:i A') }}</td>
                 </tr>
                 <tr>
                     <th>Notes:</th>

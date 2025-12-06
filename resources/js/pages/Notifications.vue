@@ -47,6 +47,7 @@
                     <div class="mb-1 text-xs text-[#7fbfb0]">Event Date: {{ formatDate(details.event_date) }}</div>
                     <div class="mb-1 text-xs text-[#7fbfb0]">Event End Date: {{ formatDate(details.event_end_date) }}</div>
                     <div class="mb-1 text-xs text-[#7fbfb0]">Status: {{ details.status }}</div>
+                    <div class="mb-1 text-xs text-[#7fbfb0]">Event Notes: {{ details.event_notes }}</div>
 
                     <h4 class="mt-3 mb-1 text-sm text-[#00f5a0]">Materials:</h4>
 
