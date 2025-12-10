@@ -160,6 +160,18 @@
             </div>
         </div>
     </div>
+
+    <Transition name="fade">
+        <div v-if="successModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+            <div class="max-w-sm rounded-2xl bg-[#0a0a0a] p-6 text-center shadow-lg sm:p-8">
+                <h2 class="mb-4 text-xl font-bold text-[#00ffc8]">Reservation Successful!</h2>
+                <p class="mb-6 text-gray-400">Your reservation has been created successfully.</p>
+                <!-- <button @click="successModal = false" class="rounded-lg bg-[#00ffc8] px-5 py-2 font-semibold text-black hover:bg-[#00c88a]">
+                    OK
+                </button> -->
+            </div>
+        </div>
+    </Transition>
 </template>
 
 <script setup>
@@ -170,6 +182,7 @@ import BaseSelect from './BaseSelect.vue';
 const emit = defineEmits(['close']);
 const submitting = ref(false);
 const errors = reactive({});
+const successModal = ref(false);
 
 const form = reactive({
     event_id: '',
@@ -216,8 +229,12 @@ async function createReservation() {
             alert(response.data.message);
             return;
         }
-        alert('Reservation created successfully!');
-        emit('close');
+        successModal.value = true;
+
+        setTimeout(() => {
+            successModal.value = false;
+            emit('close');
+        }, 5000);
     } catch (error) {
         if (error.response?.status === 422) {
             Object.assign(errors, error.response.data.errors);
@@ -252,5 +269,14 @@ input[type='date']::-webkit-calendar-picker-indicator {
     right: 0;
     top: 0;
     width: auto;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
