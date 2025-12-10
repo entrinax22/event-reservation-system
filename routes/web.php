@@ -41,6 +41,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/reservations/user/reservation/{reserved_event_id}', [ReservedEventController::class, 'reservedEventData'])->name('reservations.user.reservation');
     Route::post('/user/payments/store', [PaymentsController::class, 'store'])->name('user.payments.store');
+
+    Route::get('/user/profile', function(){
+        return Inertia::render('MyProfile');
+    })->name('user.profile');
+    Route::get('/user/profile/data', [UserController::class, 'userData'])->name('user.data');
+    Route::post('/user/profile/update', [UserController::class, 'updateProfile'])->name('user.profile.update');
+
+    Route::post('/user/password/send-otp', [UserController::class, 'sendOtpViaEmail'])->name('user.password.sendOtp');
+    Route::post('/user/password/verify-otp', [UserController::class, 'verifyOtp'])->name('user.password.verifyOtp');
+
+   
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -101,5 +112,7 @@ Route::get('/notifications/list', [NotificationsController::class, 'index'])->na
 Route::post('/notifications/mark-as-read/{id}', [NotificationsController::class, 'markAsRead'])->name('notifications.mark-as-read');
 Route::post('/notifications/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
 
+Route::post('/password/send-otp', [UserController::class, 'sendOtp'])->name('password.sendOtp');
+Route::post('/password/verify-otp', [UserController::class, 'verifyOtpForReset'])->name('password.verifyOtp');
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

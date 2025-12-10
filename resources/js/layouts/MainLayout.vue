@@ -5,7 +5,7 @@
             <!-- Logo -->
             <div class="flex items-center gap-3">
                 <div class="h-11 w-11 flex-shrink-0 rounded-full bg-gradient-to-r from-[#00f5a0] to-[#00b2ff] shadow-[0_0_18px_rgba(0,255,191,0.15)]">
-                    <img src="logo.png" alt="Big City Logo" class="h-full w-full rounded-full object-cover" />
+                    <img src="/logo.png" alt="Big City Logo" class="h-full w-full rounded-full object-cover" />
                 </div>
                 <div>
                     <h1 class="font-orbitron m-0 text-base text-[#d8ffef]">BIG CITY PRO AUDIO</h1>
@@ -30,6 +30,7 @@
                         <Link v-if="user.role === 'admin'" :href="route('admin')" class="block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60"
                             >Admin Dashboard</Link
                         >
+                        <Link :href="route('user.profile')" class="block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60">My Profile</Link>
                         <Link :href="route('notifications')" class="relative block px-4 py-2 text-sm text-[#00f5a0] hover:bg-black/60">
                             Notifications
                             <span
