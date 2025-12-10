@@ -13,8 +13,13 @@ return new class extends Migration
     {
         Schema::create('online_payment', function (Blueprint $table) {
             $table->id('online_payment_id');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('reserved_event_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('reserved_event_id');
+
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreign('reserved_event_id')->references('reserved_event_id')->on('reserved_events')->onDelete('cascade');
+
+            
             $table->decimal('amount_paid', 10, 2);
             $table->enum('status', ['pending','confirmed','cancelled'])->default('pending');
             $table->timestamps();

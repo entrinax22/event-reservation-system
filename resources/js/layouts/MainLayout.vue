@@ -16,7 +16,7 @@
             <!-- Desktop Menu -->
             <div class="hidden items-center gap-3 md:flex">
                 <Link class="mr-4 font-semibold text-[#00f5a0]" :href="route('home')">Home</Link>
-                <Link class="mr-4 font-semibold text-[#00f5a0]" :href="route('business')">Business Details</Link>
+                <!-- <Link class="mr-4 font-semibold text-[#00f5a0]" :href="route('business')">Business Details</Link> -->
 
                 <!-- User Dropdown -->
                 <div class="relative" @click="showDropdown = !showDropdown">
@@ -73,7 +73,7 @@
         <transition name="fade">
             <div v-if="mobileMenuOpen" class="z-50 mt-2 w-full max-w-5xl rounded-xl bg-black/80 p-4 md:hidden">
                 <Link class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60" :href="route('home')">Home</Link>
-                <Link class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60" :href="route('business')">Business Details</Link>
+                <!-- <Link class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60" :href="route('business')">Business Details</Link> -->
                 <Link v-if="user.role === 'admin'" :href="route('admin')" class="block px-4 py-2 text-[#00f5a0] hover:bg-black/60"
                     >Admin Dashboard</Link
                 >

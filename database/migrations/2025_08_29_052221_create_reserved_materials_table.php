@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('reserved_materials', function (Blueprint $table) {
             $table->id('reserved_material_id');
-            $table->foreignId('reserved_event_id')->constrained()->onDelete('cascade');
-            $table->foreignId('material_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('reserved_event_id');
+            $table->unsignedBigInteger('material_id');
+
+            $table->foreign('reserved_event_id')->references('reserved_event_id')->on('reserved_events')->onDelete('cascade');
+            $table->foreign('material_id')->references('material_id')->on('materials')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

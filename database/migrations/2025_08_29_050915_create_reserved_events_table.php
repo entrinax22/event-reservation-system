@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('reserved_events', function (Blueprint $table) {
             $table->id('reserved_event_id');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('event_id');
+            
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreign('event_id')->references('event_id')->on('events')->onDelete('cascade');
+
             $table->dateTime('event_date');
             $table->dateTime('event_end_date')->nullable();
             $table->decimal('total_cost', 10, 2)->default(0);
