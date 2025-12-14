@@ -17,6 +17,7 @@ class EventController extends Controller
         return Inertia::render('admin/events/create');
     }
 
+    // Create a new event
     public function store(Request $request)
     {
         try{
@@ -25,8 +26,7 @@ class EventController extends Controller
                 'event_description' => 'required|string|max:255',
             ]);
 
-
-            $user = Event::create([
+            $event = Event::create([
                 'event_name' => $validated['event_name'],
                 'event_description' => $validated['event_description'],
             ]);
@@ -43,6 +43,7 @@ class EventController extends Controller
         }
     }
 
+    //list function with search and pagination to display the data in event table
     public function list(Request $request)
     {
         try {
@@ -89,7 +90,7 @@ class EventController extends Controller
         }
     }
 
-    
+    // updating the details of an event
     public function update(Request $request)
     {
         try {
@@ -125,6 +126,7 @@ class EventController extends Controller
         }
     }
 
+    //deleting an event
     public function destroy(Request $request)
     {
         try {
@@ -150,6 +152,7 @@ class EventController extends Controller
         }
     }
 
+    //select event list in forms
     public function selectList(){
         try {
             $events = Event::select('event_id', 'event_name')->get();

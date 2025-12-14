@@ -131,7 +131,7 @@ class PaymentsController extends Controller
                 $booking->status = 'accepted';
                 $booking->save();
             }else{
-                $booking->status = 'pending';
+                $booking->status = 'downpayment_update';
                 $booking->save();
             }
 
@@ -139,10 +139,11 @@ class PaymentsController extends Controller
 
             $booking->load(['event', 'materials', 'user']);
             $user = $booking->user;
+            $message = "Your payment for the event '{$booking->event->event_name}' has been updated to '{$validated['status']}'.";
 
             // Send notification (database or in-app) first — prevents duplicate mail if notification sends mail channel
             if ($user) {
-                $user->notify(new NewUpdateReservationNotification($booking));
+                $user->notify(new NewUpdateReservationNotification($booking, $message));
             }
 
             // Send the mail (queued) only if user has an email and you want a dedicated email

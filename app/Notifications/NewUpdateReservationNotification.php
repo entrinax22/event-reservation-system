@@ -12,15 +12,17 @@ class NewUpdateReservationNotification extends Notification
     use Queueable;
 
     private $reservation;
+    private $message;
 
-    public function __construct($reservation)
+    public function __construct($reservation, $message = null)
     {
         $this->reservation = $reservation;
+        $this->message = $message;
     }
 
     public function via($notifiable)
     {
-        return ['database'];  
+        return ['database'];
     }
 
     public function toDatabase($notifiable)
@@ -29,7 +31,7 @@ class NewUpdateReservationNotification extends Notification
             'reservation_id' => $this->reservation->reserved_event_id,
             'event_date'     => $this->reservation->event_date,
             'status'         => $this->reservation->status,
-            'message'        => "Your reservation has been updated.",
+            'message'        => $this->message ?? 'Your reservation has been updated.',
         ];
     }
 }

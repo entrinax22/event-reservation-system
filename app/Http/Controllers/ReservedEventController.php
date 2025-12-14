@@ -230,7 +230,8 @@ class ReservedEventController extends Controller
             $reservedEvent->load('materials', 'user');
             
             $user = $reservedEvent->user;
-            $user->notify(new NewUpdateReservationNotification($reservedEvent));
+            $message = 'Your reservation has been updated.';
+            $user->notify(new NewUpdateReservationNotification($reservedEvent, $message));
             
             if ($user && $user->email) {
                 try {
