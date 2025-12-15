@@ -164,8 +164,10 @@ function getStatusStyle(status) {
     switch (status) {
         case 'pending':
             return { bg: 'bg-yellow-400/10 hover:bg-yellow-400/20', border: 'border-yellow-400', text: 'text-yellow-200' };
-        case 'booked':
-            return { bg: 'bg-red-500/10 hover:bg-red-500/20', border: 'border-red-500', text: 'text-red-200' };
+        case 'downpayment_update':
+            return { bg: 'bg-yellow-400/10 hover:bg-yellow-400/20', border: 'border-yellow-400', text: 'text-yellow-200' };
+        case 'accepted':
+            return { bg: 'bg-green-400/10 hover:bg-green-400/20', border: 'border-green-400', text: 'text-green-200' };
         default:
             return { bg: 'bg-[#7fbfb0]/10', border: 'border-[#7fbfb0]', text: 'text-[#c8fff0]' };
     }
