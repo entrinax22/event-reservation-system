@@ -119,10 +119,24 @@
                 </div>
 
                 <!-- Legend -->
-                <div class="flex items-center gap-6 border-t border-white/10 bg-black/20 p-4 text-xs font-medium text-[#7fbfb0]">
-                    <div class="flex items-center gap-2"><span class="dot bg-[#c8fff0] shadow-[0_0_8px_rgba(200,255,240,0.5)]"></span> Today</div>
-                    <div class="flex items-center gap-2"><span class="dot bg-[#ffd166] shadow-[0_0_8px_rgba(255,209,102,0.4)]"></span> Pending</div>
-                    <div class="flex items-center gap-2"><span class="dot bg-[#ff6666] shadow-[0_0_8px_rgba(255,102,102,0.4)]"></span> Booked</div>
+                <div class="flex flex-wrap items-center gap-6 border-t border-white/10 bg-black/20 p-4 text-xs font-medium text-[#7fbfb0]">
+                    <!-- Today -->
+                    <div class="flex items-center gap-2">
+                        <span class="dot bg-[#c8fff0] shadow-[0_0_8px_rgba(200,255,240,0.5)]"></span>
+                        Today
+                    </div>
+
+                    <!-- Pending -->
+                    <div class="flex items-center gap-2">
+                        <span class="dot bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.4)]"></span>
+                        Pending/Downpayment Update
+                    </div>
+
+                    <!-- Accepted -->
+                    <div class="flex items-center gap-2">
+                        <span class="dot bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.4)]"></span>
+                        Accepted
+                    </div>
                 </div>
             </div>
         </section>
