@@ -5,8 +5,8 @@
             <!-- Dashboard Heading -->
             <div class="flex items-center justify-between border-b border-[#00f5a0]/30 pb-4">
                 <div>
-                    <h1 class="font-orbitron text-3xl font-bold tracking-wide text-[#00f5a0]">Admin Dashboard</h1>
-                    <p class="text-sm text-[#7fbfb0]">Welcome back, Admin. Here’s what’s happening today.</p>
+                    <h1 class="font-orbitron text-3xl font-bold tracking-wide text-white">Admin Dashboard</h1>
+                    <p class="text-xl text-white">Welcome back, Admin. Here’s what’s happening today.</p>
                 </div>
                 <button @click="downloadPDF" class="rounded bg-green-400 px-4 py-2 font-bold text-black">Download PDF Report</button>
             </div>

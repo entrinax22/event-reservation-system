@@ -22,6 +22,7 @@ class MaterialController extends Controller
             $validated = $request->validate([
                 'material_name' => 'required|string|max:255',
                 'material_description' => 'required|string|max:255',
+                'material_quantity' => 'required|integer|min:0',
                 'status' => 'required|in:inactive,active',
             ]);
 
@@ -29,6 +30,7 @@ class MaterialController extends Controller
             $user = Material::create([
                 'material_name' => $validated['material_name'],
                 'material_description' => $validated['material_description'],
+                'material_quantity' => $validated['material_quantity'],
                 'status' => $validated['status'],
             ]);
 
@@ -66,6 +68,7 @@ class MaterialController extends Controller
                     'material_id' => $material->material_id,
                     'material_name' => $material->material_name,
                     'material_description' => $material->material_description,
+                    'material_quantity' => $material->material_quantity,
                     'status' => $material->status,
                 ];
             });
@@ -98,6 +101,7 @@ class MaterialController extends Controller
                 'material_id' => 'required',
                 'material_name' => 'required|string|max:255',
                 'material_description' => 'required|string|max:255',
+                'material_quantity' => 'required|integer|min:0',
                 'status' => 'required|in:inactive,active',
             ]);
 
@@ -154,7 +158,7 @@ class MaterialController extends Controller
 
     public function selectList(){
         try {
-            $materials = Material::select('material_id', 'material_name')->where('status', 'active')->get();
+            $materials = Material::select('material_id', 'material_name', 'material_quantity')->where('status', 'active')->get();
 
             return response()->json([
                 'result'  => true,

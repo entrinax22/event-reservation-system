@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('materials', function (Blueprint $table) {
             $table->id('material_id');
             $table->string('material_name');
+            $table->integer('material_quantity')->default(0);
             $table->string('material_description');
             $table->enum('status', ['inactive','active'])->default('active');
             $table->timestamps();

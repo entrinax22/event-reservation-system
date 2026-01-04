@@ -10,33 +10,34 @@
             <!-- Dynamic Form -->
             <form @submit.prevent="handleSubmit">
                 <div :class="['grid gap-6', columns === 2 ? 'grid-cols-2' : 'grid-cols-1']">
+                    <!-- Standard Fields -->
                     <div v-for="field in fields" :key="field.key" :class="field.fullWidth ? `md:col-span-${columns}` : ''">
                         <label class="mb-2 block text-sm text-gray-300">{{ field.label }}</label>
 
-                        <!-- Input: Text / Email -->
+                        <!-- Text / Email -->
                         <input
                             v-if="field.type === 'text' || field.type === 'email'"
                             v-model="form[field.key]"
                             :type="field.type"
-                            class="mt-1 w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]"
                             :placeholder="field.placeholder || ''"
+                            class="mt-1 w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]"
                         />
 
-                        <!-- Input: Number -->
+                        <!-- Number -->
                         <input
                             v-else-if="field.type === 'number'"
                             v-model.number="form[field.key]"
                             type="number"
                             step="0.01"
                             :readonly="field.key === 'downpayment_amount'"
+                            :placeholder="field.placeholder || ''"
                             :class="[
-                                'mt-1 w-full rounded-md border border-gray-600 px-3 py-2 text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]',
+                                'mt-1 w-full rounded-md border px-3 py-2 text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]',
                                 field.key === 'downpayment_amount' ? 'cursor-not-allowed bg-gray-800/50' : 'bg-black/30',
                             ]"
-                            :placeholder="field.placeholder || ''"
                         />
 
-                        <!-- Date Input -->
+                        <!-- Date -->
                         <input
                             v-else-if="field.type === 'date'"
                             v-model="form[field.key]"
@@ -48,21 +49,44 @@
                         <textarea
                             v-else-if="field.type === 'textarea'"
                             v-model="form[field.key]"
-                            class="mt-1 w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]"
                             :placeholder="field.placeholder || ''"
                             rows="3"
+                            class="mt-1 w-full rounded-md border border-gray-600 bg-black/30 px-3 py-2 text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]"
                         ></textarea>
 
-                        <!-- BaseSelect: single or multi -->
+                        <!-- BaseSelect / MultiSelect -->
                         <BaseSelect
-                            v-else-if="field.type === 'baseselect' || field.type === 'select' || field.type === 'multiselect'"
+                            v-else-if="['baseselect', 'select', 'multiselect'].includes(field.type)"
                             v-model="form[field.key]"
                             :options="field.options"
                             :multiple="field.multiple || field.type === 'multiselect'"
                             :placeholder="'Select ' + field.label"
+                            :allow-other="true"
+                            @other-input="
+                                (val) => {
+                                    form.event_name = val; // typed value
+                                    form.event_id = ''; // clear ID when typing
+                                }
+                            "
                         />
-
-                        <!-- Custom slot for overrides -->
+                        <!-- Materials Section Inline -->
+                        <div v-else-if="field.type === 'materials'">
+                            <div v-for="(m, index) in form.materials" :key="index" class="mb-2 flex items-center gap-2">
+                                <BaseSelect v-model="m.material_id" :options="materialOptions" :placeholder="'Select Material'" class="flex-1" />
+                                <input type="number" min="1" v-model.number="m.material_quantity" class="w-20 rounded border px-2 py-1 text-white" />
+                                <button type="button" @click="form.materials.splice(index, 1)" class="rounded bg-red-600 px-2 py-1 text-white">
+                                    Remove
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                @click="form.materials.push({ material_id: '', material_quantity: 1 })"
+                                class="rounded bg-green-600 px-3 py-1 text-white"
+                            >
+                                Add Material
+                            </button>
+                        </div>
+                        <!-- Custom Slot -->
                         <slot v-else :field="field" :model-value="form[field.key]" :update="(val) => (form[field.key] = val)"></slot>
                     </div>
                 </div>
@@ -88,7 +112,8 @@ const props = defineProps({
     title: { type: String, default: 'Edit' },
     fields: { type: Array, required: true },
     modelValue: { type: Object, default: () => ({}) },
-    columns: { type: Number, default: 2 }, // <--- dynamic columns
+    materialOptions: { type: Array, default: () => [] },
+    columns: { type: Number, default: 2 },
 });
 
 const emit = defineEmits(['close', 'save', 'update:modelValue']);
@@ -100,19 +125,12 @@ watch(
     (newVal) => {
         const formattedData = { ...newVal };
 
-        // Format dates for date inputs
         props.fields.forEach((f) => {
             if (f.type === 'date' && formattedData[f.key]) {
                 const date = new Date(formattedData[f.key]);
                 if (!isNaN(date.getTime())) formattedData[f.key] = date.toISOString().split('T')[0];
             }
-        });
-
-        // Ensure array fields
-        props.fields.forEach((f) => {
-            if ((f.type === 'multiselect' || f.key === 'materials') && !Array.isArray(formattedData[f.key])) {
-                formattedData[f.key] = [];
-            }
+            if ((f.type === 'multiselect' || f.key === 'materials') && !Array.isArray(formattedData[f.key])) formattedData[f.key] = [];
         });
 
         Object.assign(form, formattedData);

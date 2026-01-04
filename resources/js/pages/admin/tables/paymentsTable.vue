@@ -4,8 +4,8 @@
         <section class="space-y-8">
             <!-- Header -->
             <div class="border-b border-[#00f5a0]/30 pb-4">
-                <h1 class="font-orbitron text-3xl font-bold tracking-wide text-[#00f5a0]">Event Payments</h1>
-                <p class="text-sm text-[#7fbfb0]">Manage event payments and its details.</p>
+                <h1 class="font-orbitron text-3xl font-bold tracking-wide text-white">Event Payments</h1>
+                <p class="text-xl text-white">Manage event payments and its details.</p>
             </div>
 
             <!-- Table with search toolbar -->

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\Material;
 use Illuminate\Http\Request;
 use App\Models\ReservedEvent;
 use App\Mail\BookingUpdateMail;
@@ -39,6 +40,7 @@ class ReservedEventController extends Controller
                 'event_id'           => 'required|exists:events,event_id',
                 'materials'          => 'nullable|array',
                 'materials.*.material_id' => 'required|exists:materials,material_id',
+                'materials.*.quantity'    => 'required|integer|min:1',
                 'total_cost'         => 'required|numeric|min:0',
                 'downpayment_amount' => 'nullable|numeric|min:0',
                 'event_notes'        => 'nullable|string',
@@ -57,10 +59,24 @@ class ReservedEventController extends Controller
             ]);
 
             if (!empty($validated['materials'])) {
-                foreach ($validated['materials'] as $material) {
+                foreach ($validated['materials'] as $item) {
+
+                    $material = Material::where('material_id', $item['material_id'])->first();
+
+                    if ($material->material_quantity < $item['quantity']) {
+                        return response()->json([
+                            'result' => false,
+                            'message' => 'Requested quantity for ' . $material->material_name . ' exceeds available stock.',
+                        ], 400);
+                    }else{
+                        $material->material_quantity -= $item['quantity'];
+                        $material->save();
+                    }
+
                     ReservedMaterial::create([
                         'reserved_event_id' => $reservation->reserved_event_id,
-                        'material_id'       => $material['material_id'],
+                        'material_id'       => $item['material_id'],
+                        'material_quantity' => $item['quantity'],
                     ]);
                 }
             }
@@ -128,7 +144,7 @@ class ReservedEventController extends Controller
                     'event_id' => $re->event_id,
                     'user_id' => $re->user_id,
                     'user_name' => $re->user?->name,
-                    'event_name' => $re->event?->event_name,
+                    'event_name' => $re->event_name ?? $re->event?->event_name,
                     'event_notes' => $re->event_notes,
                     'event_date' => $re->event_date,
                     'event_end_date' => $re->event_end_date,
@@ -139,6 +155,7 @@ class ReservedEventController extends Controller
                             'material_id'          => $rm->material?->material_id,
                             'material_name'        => $rm->material?->material_name,
                             'material_description' => $rm->material?->material_description,
+                            'material_quantity'    => $rm->material_quantity,
                         ];
                     }),
                     'status' => $re->status,
@@ -177,29 +194,24 @@ class ReservedEventController extends Controller
                 'event_date'        => 'nullable|date',
                 'event_end_date'    => 'nullable|date|after_or_equal:event_date',
                 'event_id'          => 'nullable|exists:events,event_id',
+                'event_name'        => 'nullable|string|max:255',
                 'materials'         => 'nullable|array',
                 'materials.*.material_id' => 'required|exists:materials,material_id',
+                'materials.*.quantity'    => 'required|integer|min:1',
                 'total_cost'        => 'nullable|numeric|min:0',
                 'downpayment_amount'=> 'nullable|numeric|min:0',
                 'event_notes'       => 'nullable|string',
                 'status'            => 'required|string|in:pending,accepted,downpayment_update,completed,cancelled',
             ]);
 
-            // Find the reserved event
             $reservedEvent = ReservedEvent::findOrFail($validated['reserved_event_id']);
 
-            // Prepare update data
+            // Update main fields
             $updateData = collect($validated)->except(['reserved_event_id', 'materials'])->toArray();
+            if (isset($updateData['total_cost'])) $updateData['total_cost'] = (float) $updateData['total_cost'];
+            if (isset($updateData['downpayment_amount'])) $updateData['downpayment_amount'] = (float) $updateData['downpayment_amount'];
 
-            // Convert numeric fields
-            if (isset($updateData['total_cost'])) {
-                $updateData['total_cost'] = (float) $updateData['total_cost'];
-            }
-            if (isset($updateData['downpayment_amount'])) {
-                $updateData['downpayment_amount'] = (float) $updateData['downpayment_amount'];
-            }
-
-            // Downpayment check
+            // Downpayment validation
             if (isset($updateData['downpayment_amount'], $updateData['total_cost']) &&
                 $updateData['downpayment_amount'] > $updateData['total_cost']) {
                 return response()->json([
@@ -209,36 +221,63 @@ class ReservedEventController extends Controller
                 ], 422);
             }
 
-            // Update the reserved event
             $reservedEvent->update($updateData);
 
-            // Handle materials: remove old and add new (like store method)
+            // Handle materials
             if (isset($validated['materials'])) {
-                // Remove existing pivot records
+
+                // Restore old stock first
+                foreach ($reservedEvent->materials as $oldMaterial) {
+                    $material = Material::find($oldMaterial->material_id);
+                    if ($material) {
+                        $material->material_quantity += $oldMaterial->material_quantity;
+                        $material->save();
+                    }
+                }
+
+                // Remove old pivot records
                 ReservedMaterial::where('reserved_event_id', $reservedEvent->reserved_event_id)->delete();
 
-                // Insert new ones
-                foreach ($validated['materials'] as $material) {
+                // Add new materials and adjust stock
+                foreach ($validated['materials'] as $item) {
+                    $material = Material::find($item['material_id']);
+                    if (!$material) continue;
+
+                    if ($material->material_quantity < $item['quantity']) {
+                        return response()->json([
+                            'result' => false,
+                            'message' => 'Requested quantity for ' . $material->material_name . ' exceeds available stock.',
+                        ], 400);
+                    }
+
+                    // Deduct new stock
+                    $material->material_quantity -= $item['quantity'];
+                    $material->save();
+
+                    // Save pivot
                     ReservedMaterial::create([
                         'reserved_event_id' => $reservedEvent->reserved_event_id,
-                        'material_id'       => $material['material_id'],
+                        'material_id'       => $item['material_id'],
+                        'material_quantity' => $item['quantity'],
                     ]);
                 }
             }
 
-            // Reload with relationships
+            // Reload relationships
             $reservedEvent->load('materials', 'user');
-            
+
+            // Notifications
             $user = $reservedEvent->user;
-            $message = 'Your reservation has been updated.';
-            $user->notify(new NewUpdateReservationNotification($reservedEvent, $message));
-            
-            if ($user && $user->email) {
-                try {
-                    
-                    Mail::to($user->email)->send(new BookingUpdateMail($reservedEvent));
-                } catch (\Exception $mailError) {
-                    Log::error('Mail sending failed: ' . $mailError->getMessage());
+            if ($user) {
+                $message = 'Your reservation has been updated.';
+                $user->notify(new NewUpdateReservationNotification($reservedEvent, $message));
+
+                if ($user->email) {
+                    try {
+                        Mail::to($user->email)->send(new BookingUpdateMail($reservedEvent));
+                    } catch (\Exception $mailError) {
+                        Log::error('Mail sending failed: ' . $mailError->getMessage());
+                    }
                 }
             }
 
@@ -269,7 +308,6 @@ class ReservedEventController extends Controller
             ], 500);
         }
     }
-
 
     public function destroy(Request $request)
     {
@@ -303,13 +341,19 @@ class ReservedEventController extends Controller
     {
         try {
             $validated = request()->validate([
-                'event_id'                => 'required|exists:events,event_id',
+                'event_id'                => 'nullable|exists:events,event_id',
+                'event_name'              => 'required_without:event_id|string|max:255',
                 'event_date'              => 'required|date',
                 'event_end_date'          => 'required|date|after_or_equal:event_date',
                 'materials'               => 'nullable|array',
-                'materials.*.material_id' => 'required|exists:materials,material_id',
+                'materials.*.material_id' => 'nullable|exists:materials,material_id',
+                'materials.*.quantity'    => 'nullable|integer|min:1',
                 'event_notes'             => 'nullable|string',
             ]);
+
+            if (!array_key_exists('event_id', $validated)) {
+                $validated['event_id'] = null;
+            }
 
             $user = Auth::user();
             if (!$user) {
@@ -344,16 +388,34 @@ class ReservedEventController extends Controller
                 'user_id'       => $user->user_id,
                 'event_date'    => $validated['event_date'],
                 'event_end_date'=> $validated['event_end_date'],
-                'event_id'      => $validated['event_id'],
+                'event_id'      => $validated['event_id'] ?? null,
+                'event_name'    => $validated['event_name'] ?? null,
                 'event_notes'   => $validated['event_notes'] ?? null,
                 'status'        => 'pending',
             ]);
 
+            
             if (!empty($validated['materials'])) {
-                foreach ($validated['materials'] as $material) {
+                foreach ($validated['materials'] as $item) {
+
+                    $material = Material::where('material_id', $item['material_id'])->first();
+
+                    if ($material->material_quantity < $item['quantity']) {
+                        return response()->json([
+                            'result' => false,
+                            'message' => 'Requested quantity for ' . $material->material_name . ' exceeds available stock.',
+                        ], 400);
+                    }
+
+                    // ✅ deduct and SAVE
+                    $material->material_quantity -= $item['quantity'];
+                    $material->save();
+
+                    // ✅ correct values
                     ReservedMaterial::create([
                         'reserved_event_id' => $reservation->reserved_event_id,
-                        'material_id'       => $material['material_id'],
+                        'material_id'       => $item['material_id'],
+                        'material_quantity' => $item['quantity'],
                     ]);
                 }
             }
@@ -389,7 +451,6 @@ class ReservedEventController extends Controller
             ], 500);
         }
     }
-
 
 
     public function eventsList(){

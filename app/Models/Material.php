@@ -11,6 +11,7 @@ class Material extends Model
     protected $fillable = [
         'material_name',
         'material_description',
+        'material_quantity',
         'status'
     ];
 

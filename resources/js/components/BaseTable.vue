@@ -7,7 +7,7 @@
         </div>
 
         <!-- Title -->
-        <h3 class="font-orbitron mb-4 text-lg text-[#00f5a0] md:text-xl">{{ title }}</h3>
+        <h3 class="font-orbitron mb-4 text-lg text-white md:text-xl">{{ title }}</h3>
 
         <!-- Desktop Table View -->
         <div class="hidden overflow-x-auto lg:block">

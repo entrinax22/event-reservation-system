@@ -11,6 +11,7 @@ class ReservedEvent extends Model
     protected $fillable = [
         'user_id',
         'event_id',
+        'event_name',
         'event_date',
         'event_end_date',
         'total_cost',

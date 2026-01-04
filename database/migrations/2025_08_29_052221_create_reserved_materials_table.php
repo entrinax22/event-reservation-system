@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('reserved_material_id');
             $table->unsignedBigInteger('reserved_event_id');
             $table->unsignedBigInteger('material_id');
-
+            $table->integer('material_quantity')->default(1);
             $table->foreign('reserved_event_id')->references('reserved_event_id')->on('reserved_events')->onDelete('cascade');
             $table->foreign('material_id')->references('material_id')->on('materials')->onDelete('cascade');
 

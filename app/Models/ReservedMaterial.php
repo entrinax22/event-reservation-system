@@ -11,6 +11,7 @@ class ReservedMaterial extends Model
     protected $fillable = [
         'reserved_event_id',
         'material_id',
+        'material_quantity',
     ];
 
     public function material()

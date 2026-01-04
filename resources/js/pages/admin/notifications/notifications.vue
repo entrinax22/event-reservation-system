@@ -2,49 +2,53 @@
     <Head title="Admin Dashboard" />
     <AdminLayout>
         <section class="space-y-8">
-            <!-- Dashboard Heading -->
             <div class="flex items-center justify-between border-b border-[#00f5a0]/30 pb-4">
                 <div>
-                    <h1 class="font-orbitron text-3xl font-bold tracking-wide text-[#00f5a0]">Admin Notifications</h1>
-                    <p class="text-sm text-[#7fbfb0]">Welcome back, Admin. Here’s what’s happening today.</p>
+                    <h1 class="font-orbitron text-4xl font-bold tracking-wide text-white">Admin Notifications</h1>
+                    <p class="text-lg text-white">Welcome back, Admin. Here’s what’s happening today.</p>
                 </div>
             </div>
 
-            <!-- Notifications List -->
             <div class="mt-6 space-y-4">
                 <div
                     v-for="item in notifications"
                     :key="item.id"
                     @click="openNotification(item)"
                     :class="[
-                        'cursor-pointer rounded-lg p-4 shadow',
-                        item.is_read ? 'bg-black/40' : 'bg-gradient-to-r from-[#00f5a0] to-[#00b2ff] text-black',
+                        'cursor-pointer rounded-lg p-5 shadow transition-transform hover:scale-[1.01]',
+                        item.is_read ? 'bg-black/40 text-white' : 'bg-gradient-to-r from-[#00f5a0] to-[#00b2ff] text-black',
                     ]"
                 >
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="font-semibold">{{ item.data.message }}</p>
-                            <p class="text-xs text-[#7fbfb0]">Event Date: {{ formatDate(item.data.event_date) }} | Status: {{ item.data.status }}</p>
+                            <p class="text-xl font-bold">{{ item.data.message }}</p>
+
+                            <p class="mt-1 text-sm" :class="item.is_read ? 'text-white' : 'font-medium text-black/80'">
+                                Event Date: {{ formatDate(item.data.event_date) }} | Status: {{ item.data.status }}
+                            </p>
                         </div>
-                        <div v-if="!item.is_read" class="h-3 w-3 rounded-full bg-[#ff007a]"></div>
+                        <div v-if="!item.is_read" class="h-4 w-4 rounded-full bg-[#ff007a] shadow-md"></div>
                     </div>
-                    <p class="mt-1 text-xs text-[#7fbfb0]">{{ formatDate(item.created_at) }}</p>
+
+                    <p class="mt-2 text-sm" :class="item.is_read ? 'text-white' : 'font-medium text-black/80'">
+                        {{ formatDate(item.created_at) }}
+                    </p>
                 </div>
             </div>
-            <!-- Pagination -->
-            <div class="mt-4 flex justify-center gap-2">
+
+            <div class="mt-6 flex justify-center gap-2 text-lg">
                 <button
-                    class="rounded bg-[#00f5a0]/30 px-3 py-1 hover:bg-[#00f5a0]"
+                    class="rounded bg-[#00f5a0]/30 px-4 py-2 hover:bg-[#00f5a0]"
                     :disabled="currentPage === 1"
                     @click="fetchNotifications(currentPage - 1)"
                 >
                     Previous
                 </button>
 
-                <span class="px-3 py-1 text-[#7fbfb0]"> Page {{ currentPage }} of {{ pagination.last_page }} </span>
+                <span class="px-4 py-2 text-[#7fbfb0]"> Page {{ currentPage }} of {{ pagination.last_page }} </span>
 
                 <button
-                    class="rounded bg-[#00f5a0]/30 px-3 py-1 hover:bg-[#00f5a0]"
+                    class="rounded bg-[#00f5a0]/30 px-4 py-2 hover:bg-[#00f5a0]"
                     :disabled="currentPage === pagination.last_page"
                     @click="fetchNotifications(currentPage + 1)"
                 >
@@ -52,41 +56,36 @@
                 </button>
             </div>
 
-            <!-- Notification Details Modal -->
             <transition name="fade">
                 <div v-if="selected" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    <div class="relative max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl bg-black/90 p-6 shadow-lg">
-                        <!-- Close Button -->
+                    <div class="relative max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-black/90 p-8 text-lg leading-relaxed shadow-lg">
                         <button
                             @click="closeModal"
-                            class="absolute top-4 right-4 rounded-full bg-[#ff007a]/70 px-3 py-1 font-bold text-white hover:bg-[#ff007a]"
+                            class="absolute top-4 right-4 rounded-full bg-[#ff007a]/70 px-4 py-2 font-bold text-white hover:bg-[#ff007a]"
                         >
                             X
                         </button>
 
-                        <!-- Modal Header -->
-                        <h2 class="mb-4 text-xl font-semibold text-[#00f5a0]">Reservation Details</h2>
+                        <h2 class="mb-6 text-3xl font-semibold text-[#00f5a0]">Reservation Details</h2>
 
-                        <!-- User Info -->
-                        <div class="mb-4 border-b border-[#00f5a0]/30 pb-2">
-                            <p><strong>User:</strong> {{ details.user.name }}</p>
-                            <p><strong>Email:</strong> {{ details.user.email }}</p>
-                            <p><strong>Event:</strong> {{ details.event.event_name }}</p>
+                        <div class="mb-6 border-b border-[#00f5a0]/30 pb-4 text-xl">
+                            <p class="mb-2"><strong>User:</strong> {{ details.user.name }}</p>
+                            <p class="mb-2"><strong>Email:</strong> {{ details.user.email }}</p>
+                            <p class="mb-2"><strong>Event:</strong> {{ details.event.event_name }}</p>
                         </div>
 
-                        <!-- Event Info -->
-                        <div class="mb-4 border-b border-[#00f5a0]/30 pb-2">
-                            <p><strong>Event Date:</strong> {{ formatDate(details.event_date) }}</p>
-                            <p><strong>Event End Date:</strong> {{ formatDate(details.event_end_date) }}</p>
-                            <p><strong>Status:</strong> {{ details.status }}</p>
-                            <p><strong>Total Cost:</strong> ₱{{ details.total_cost }}</p>
-                            <p v-if="details.event_notes"><strong>Notes:</strong> {{ details.event_notes }}</p>
+                        <div class="mb-6 border-b border-[#00f5a0]/30 pb-4 text-xl">
+                            <p class="mb-2"><strong>Event Date:</strong> {{ formatDate(details.event_date) }}</p>
+                            <p class="mb-2"><strong>Event End Date:</strong> {{ formatDate(details.event_end_date) }}</p>
+                            <p class="mb-2"><strong>Status:</strong> {{ details.status }}</p>
+                            <p class="mb-2"><strong>Total Cost:</strong> ₱{{ details.total_cost }}</p>
+                            <p v-if="details.event_notes" class="mb-2"><strong>Notes:</strong> {{ details.event_notes }}</p>
                         </div>
 
-                        <!-- Materials -->
-                        <div>
-                            <h3 class="mb-2 font-semibold text-[#00f5a0]">Materials Reserved</h3>
-                            <ul class="list-inside list-disc space-y-1">
+                        <div class="text-xl">
+                            <h3 class="mb-3 text-2xl font-semibold text-[#00f5a0]">Materials Reserved</h3>
+
+                            <ul class="list-inside list-disc space-y-2">
                                 <li v-for="m in details.materials" :key="m.reserved_material_id">
                                     {{ m.material.material_name }} - {{ m.material.material_description }}
                                 </li>
