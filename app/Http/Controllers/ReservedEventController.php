@@ -477,7 +477,7 @@ class ReservedEventController extends Controller
                     ],
                     'reserved_event_id' => $re->reserved_event_id,
                     'event_id' => $re->event_id,
-                    'event_name' => $re->event?->event_name,
+                    'event_name' => $re->event?->event_name ?? $re->event_name,
                     'event_date' => $re->event_date,
                     'event_end_date' => $re->event_end_date,
                     'status' => $re->status,
