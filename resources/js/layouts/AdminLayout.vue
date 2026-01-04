@@ -4,7 +4,7 @@
             class="fixed top-4 left-4 z-50 rounded-md border border-white/10 bg-black/40 p-2 text-white backdrop-blur-md transition hover:bg-black/60 hover:text-[#00f5a0] md:hidden"
             @click="sidebarOpen = !sidebarOpen"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
         </button>
@@ -12,33 +12,33 @@
         <transition name="slide">
             <aside
                 v-if="sidebarOpen || isDesktop"
-                class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-hidden border-r border-white/10 bg-black/20 shadow-2xl backdrop-blur-xl md:static"
+                class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col overflow-hidden border-r border-white/10 bg-black/20 shadow-2xl backdrop-blur-xl md:static"
             >
                 <div class="flex h-full flex-col px-6 py-8">
                     <div class="custom-scrollbar flex-1 overflow-y-auto">
-                        <div class="mb-10 flex items-center gap-3">
+                        <div class="mb-10 flex items-center gap-4">
                             <div
-                                class="h-11 w-11 flex-shrink-0 rounded-full bg-gradient-to-r from-[#00f5a0] to-[#00b2ff] p-[2px] shadow-[0_0_15px_rgba(0,245,160,0.3)]"
+                                class="h-12 w-12 flex-shrink-0 rounded-full bg-gradient-to-r from-[#00f5a0] to-[#00b2ff] p-[2px] shadow-[0_0_15px_rgba(0,245,160,0.3)]"
                             >
                                 <img src="/logo.png" alt="Big City Logo" class="h-full w-full rounded-full bg-black object-cover" />
                             </div>
                             <div>
-                                <h1 class="font-orbitron m-0 text-sm font-bold tracking-wider text-white">BIG CITY PRO AUDIO</h1>
-                                <div class="text-xs font-medium tracking-wide text-[#00f5a0]">Admin Panel</div>
+                                <h1 class="font-orbitron m-0 text-base font-bold tracking-wider text-white">BIG CITY PRO AUDIO</h1>
+                                <div class="text-sm font-medium tracking-wide text-[#00f5a0]">Admin Panel</div>
                             </div>
                         </div>
 
-                        <nav class="flex flex-col gap-6">
+                        <nav class="flex flex-col gap-8">
                             <div>
-                                <p class="mb-3 px-2 text-xs font-bold tracking-widest text-[#00f5a0]/80 uppercase">Main</p>
-                                <div class="flex flex-col gap-2">
+                                <p class="mb-3 px-2 text-sm font-bold tracking-widest text-[#00f5a0]/80 uppercase">Main</p>
+                                <div class="flex flex-col gap-3">
                                     <Link :href="route('home')" class="sidebar-link">Home</Link>
                                     <Link :href="route('admin')" class="sidebar-link">Dashboard</Link>
                                     <Link :href="route('notifications.admin')" class="sidebar-link relative">
                                         Notifications
                                         <span
                                             v-if="count > 0"
-                                            class="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff007a] text-[10px] font-bold text-white shadow-md"
+                                            class="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-[#ff007a] text-xs font-bold text-white shadow-md"
                                         >
                                             {{ count }}
                                         </span>
@@ -47,8 +47,8 @@
                             </div>
 
                             <div>
-                                <p class="mb-3 px-2 text-xs font-bold tracking-widest text-[#00f5a0]/80 uppercase">Management</p>
-                                <div class="flex flex-col gap-2">
+                                <p class="mb-3 px-2 text-sm font-bold tracking-widest text-[#00f5a0]/80 uppercase">Management</p>
+                                <div class="flex flex-col gap-3">
                                     <Link :href="route('admin.users.table')" class="sidebar-link">Users</Link>
                                     <Link :href="route('admin.events.table')" class="sidebar-link">Events</Link>
                                     <Link :href="route('admin.materials.table')" class="sidebar-link">Equipments</Link>
@@ -60,15 +60,15 @@
                     </div>
 
                     <div class="mt-4 flex-shrink-0 border-t border-white/10 pt-6">
-                        <div class="mb-3 flex items-center gap-3 px-2">
-                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-[#00f5a0] to-[#00b2ff]"></div>
-                            <span class="font-semibold tracking-wide text-white">{{ user?.name || 'Admin' }}</span>
+                        <div class="mb-4 flex items-center gap-3 px-2">
+                            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-[#00f5a0] to-[#00b2ff]"></div>
+                            <span class="text-lg font-semibold tracking-wide text-white">{{ user?.name || 'Admin' }}</span>
                         </div>
                         <Link
                             :href="route('logout')"
                             method="post"
                             as="button"
-                            class="w-full rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-left text-sm font-semibold text-red-300 transition-all hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-200"
+                            class="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-left text-base font-semibold text-red-300 transition-all hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-200"
                         >
                             Logout
                         </Link>
@@ -78,7 +78,7 @@
         </transition>
 
         <main class="min-h-screen flex-1 overflow-x-auto overflow-y-auto md:ml-0">
-            <div class="min-w-full p-4 md:p-10">
+            <div class="min-w-full p-6 md:p-12">
                 <slot />
             </div>
         </main>
@@ -136,11 +136,11 @@ const fetchCount = async () => {
 
 .sidebar-link {
     display: block;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1.2rem; /* Increased padding */
     border-radius: 0.75rem;
-    font-size: 0.9rem;
+    font-size: 1.05rem; /* Increased font size */
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.85); /* White text for better readability on green bg */
+    color: rgba(255, 255, 255, 0.85);
     transition: all 0.2s ease;
     text-decoration: none;
     border: 1px solid transparent;
@@ -149,7 +149,7 @@ const fetchCount = async () => {
 .sidebar-link:hover,
 .sidebar-link.active {
     background: linear-gradient(90deg, #00f5a0, #00b2ff);
-    color: #000; /* Black text on bright gradient hover */
+    color: #000;
     font-weight: 700;
     box-shadow: 0 0 15px rgba(0, 245, 160, 0.4);
     transform: translateX(4px);

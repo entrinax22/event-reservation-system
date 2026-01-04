@@ -50,11 +50,11 @@
                             :key="booking.date + booking.client"
                             class="border-b border-gray-700 hover:bg-gray-800/40"
                         >
-                            <td class="py-3">{{ formatDate(booking.date) }}</td>
-                            <td class="py-3">{{ formatDate(booking.end_date) }}</td>
-                            <td class="py-3">{{ booking.client }}</td>
-                            <td class="py-3">{{ booking.type }}</td>
-                            <td class="py-3">
+                            <td class="py-3 text-xl">{{ formatDate(booking.date) }}</td>
+                            <td class="py-3 text-xl">{{ formatDate(booking.end_date) }}</td>
+                            <td class="py-3 text-xl">{{ booking.client }}</td>
+                            <td class="py-3 text-xl">{{ booking.type }}</td>
+                            <td class="py-3 text-xl">
                                 <span
                                     :class="{
                                         'rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white':
