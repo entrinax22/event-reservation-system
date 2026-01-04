@@ -67,7 +67,7 @@
                         </div>
                     </div>
 
-                    <h4 class="mt-8 mb-3 text-xl font-bold text-[#00f5a0]">Materials:</h4>
+                    <h4 class="mt-8 mb-3 text-xl font-bold text-[#00f5a0]">Equipments:</h4>
 
                     <ul class="list-inside list-disc space-y-2 text-lg text-white">
                         <li v-for="m in details.materials" :key="m.reserved_material_id">

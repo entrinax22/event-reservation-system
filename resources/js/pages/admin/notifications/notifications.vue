@@ -68,28 +68,43 @@
 
                         <h2 class="mb-6 text-3xl font-semibold text-[#00f5a0]">Reservation Details</h2>
 
-                        <div class="mb-6 border-b border-[#00f5a0]/30 pb-4 text-xl">
-                            <p class="mb-2"><strong>User:</strong> {{ details.user.name }}</p>
-                            <p class="mb-2"><strong>Email:</strong> {{ details.user.email }}</p>
-                            <p class="mb-2"><strong>Event:</strong> {{ details.event.event_name }}</p>
+                        <div v-if="!details" class="flex flex-col items-center justify-center py-10">
+                            <svg class="h-10 w-10 animate-spin text-[#00f5a0]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                            <p class="mt-4 text-[#7fbfb0]">Loading details...</p>
                         </div>
 
-                        <div class="mb-6 border-b border-[#00f5a0]/30 pb-4 text-xl">
-                            <p class="mb-2"><strong>Event Date:</strong> {{ formatDate(details.event_date) }}</p>
-                            <p class="mb-2"><strong>Event End Date:</strong> {{ formatDate(details.event_end_date) }}</p>
-                            <p class="mb-2"><strong>Status:</strong> {{ details.status }}</p>
-                            <p class="mb-2"><strong>Total Cost:</strong> ₱{{ details.total_cost }}</p>
-                            <p v-if="details.event_notes" class="mb-2"><strong>Notes:</strong> {{ details.event_notes }}</p>
-                        </div>
+                        <div v-else>
+                            <div class="mb-6 border-b border-[#00f5a0]/30 pb-4 text-xl">
+                                <p class="mb-2"><strong>User:</strong> {{ details.user?.name ?? 'Unknown' }}</p>
+                                <p class="mb-2"><strong>Email:</strong> {{ details.user?.email ?? 'N/A' }}</p>
+                                <p class="mb-2"><strong>Event:</strong> {{ details.event ? details.event.event_name : details.event_name }}</p>
+                            </div>
 
-                        <div class="text-xl">
-                            <h3 class="mb-3 text-2xl font-semibold text-[#00f5a0]">Materials Reserved</h3>
+                            <div class="mb-6 border-b border-[#00f5a0]/30 pb-4 text-xl">
+                                <p class="mb-2"><strong>Event Date:</strong> {{ formatDate(details.event_date) }}</p>
+                                <p class="mb-2"><strong>Event End Date:</strong> {{ formatDate(details.event_end_date) }}</p>
+                                <p class="mb-2"><strong>Status:</strong> {{ details.status }}</p>
+                                <p class="mb-2"><strong>Total Cost:</strong> ₱{{ details.total_cost }}</p>
+                                <p v-if="details.event_notes" class="mb-2"><strong>Notes:</strong> {{ details.event_notes }}</p>
+                            </div>
 
-                            <ul class="list-inside list-disc space-y-2">
-                                <li v-for="m in details.materials" :key="m.reserved_material_id">
-                                    {{ m.material.material_name }} - {{ m.material.material_description }}
-                                </li>
-                            </ul>
+                            <div class="text-xl">
+                                <h3 class="mb-3 text-2xl font-semibold text-[#00f5a0]">Equipments Reserved</h3>
+
+                                <ul v-if="details.materials && details.materials.length > 0" class="list-inside list-disc space-y-2">
+                                    <li v-for="m in details.materials" :key="m.reserved_material_id">
+                                        {{ m.material?.material_name }} - {{ m.material?.material_description }}
+                                    </li>
+                                </ul>
+                                <p v-else class="text-gray-400">No equipment reserved.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -106,7 +121,7 @@ import { onMounted, ref } from 'vue';
 
 const notifications = ref([]);
 const selected = ref(null);
-const details = ref([]);
+const details = ref(null); // Changed to null to indicate "not loaded"
 const currentPage = ref(1);
 const pagination = ref({ current_page: 1, last_page: 1 });
 
@@ -139,10 +154,16 @@ const fetchNotificationDetails = async (reserved_event_id) => {
 // Open notification and mark as read
 const openNotification = async (item) => {
     selected.value = item;
+    details.value = null; // Reset details so the loader shows immediately
 
     if (!item.is_read) {
-        await axios.post(route('notifications.mark-as-read', item.id));
-        item.is_read = true; // update UI
+        // Optimistically update UI
+        item.is_read = true;
+        try {
+            await axios.post(route('notifications.mark-as-read', item.id));
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     fetchNotificationDetails(item.data.reservation_id);
@@ -151,11 +172,12 @@ const openNotification = async (item) => {
 // Close modal
 const closeModal = () => {
     selected.value = null;
-    details.value = [];
+    details.value = null;
 };
 
 // Format date nicely
 const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
 };

@@ -90,17 +90,17 @@ const statusColors = (status) => {
     if (!status) return 'text-gray-500';
     switch (status.toLowerCase()) {
         case 'completed':
-            return 'text-blue-500';
+            return 'text-blue-400';
         case 'accepted':
-            return 'text-green-500';
+            return 'text-green-400';
         case 'confirmed':
-            return 'text-green-500';
+            return 'text-green-400';
         case 'pending':
-            return 'text-yellow-500';
+            return 'text-yellow-400';
         case 'cancelled':
-            return 'text-red-500';
+            return 'text-red-400';
         default:
-            return 'text-gray-500';
+            return 'text-gray-400';
     }
 };
 
@@ -128,51 +128,58 @@ const cancelReservation = async (booking) => {
     }
 };
 </script>
+
 <template>
     <Head title="My Bookings" />
     <MainLayout>
-        <section class="card rounded-2xl border border-black/20 bg-[rgba(0,0,0,0.78)] p-5 shadow-xl">
-            <h2 class="font-orbitron mb-4 text-xl text-[#00f5a0]">My Bookings</h2>
+        <section class="card rounded-2xl border border-black/20 bg-[rgba(0,0,0,0.78)] p-6 shadow-xl">
+            <h2 class="font-orbitron mb-6 text-3xl font-bold text-[#00f5a0]">My Bookings</h2>
 
-            <div v-if="bookings.length === 0" class="text-sm text-[#7fbfb0]">You have no bookings.</div>
+            <div v-if="bookings.length === 0" class="text-xl text-[#7fbfb0]">You have no bookings.</div>
 
-            <!--Bookings-->
             <div
                 v-for="booking in bookings"
                 :key="booking.reserved_event_id"
-                class="mb-4 flex items-center justify-between rounded-lg border border-gray-700 p-4"
+                class="mb-6 flex items-center justify-between rounded-xl border border-gray-700 bg-white/5 p-6 shadow-lg transition hover:border-[#00f5a0]/30"
             >
-                <div>
-                    <h3 class="font-orbitron mb-2 text-lg text-[#00f5a0]">Event: {{ booking.event.event_name }}</h3>
-                    <p class="text-sm text-[#7fbfb0]">Date: {{ formatDate(booking.event_date) }}</p>
+                <div class="space-y-2">
+                    <h3 class="font-orbitron text-2xl font-bold text-[#00f5a0]">
+                        {{ booking.event ? booking.event.event_name : booking.event_name }}
+                    </h3>
 
-                    <!-- TOTAL COST -->
-                    <p class="text-sm text-white">
-                        Total Cost:
-                        <span class="font-semibold text-[#00f5a0]">
+                    <p class="text-lg text-[#7fbfb0]"><span class="text-gray-400">Date:</span> {{ formatDate(booking.event_date) }}</p>
+
+                    <p class="text-lg text-white">
+                        <span class="text-gray-400">Total Cost:</span>
+                        <span class="ml-2 font-bold text-[#00f5a0]">
                             {{ formatCurrency(booking.total_cost) }}
                         </span>
                     </p>
 
-                    <!-- DOWNPAYMENT REQUIRED -->
-                    <p class="text-sm text-white">
-                        Downpayment Required:
-                        <span class="font-semibold text-[#00f5a0]">
+                    <p class="text-lg text-white">
+                        <span class="text-gray-400">Downpayment Required:</span>
+                        <span class="ml-2 font-bold text-[#00f5a0]">
                             {{ formatCurrency(booking.downpayment_amount) }}
                         </span>
                     </p>
 
-                    <p class="text-sm capitalize" :class="statusColors(booking.status)">Status: {{ booking.status }}</p>
+                    <p class="text-lg font-medium capitalize" :class="statusColors(booking.status)">
+                        <span class="text-gray-400">Status:</span> {{ booking.status }}
+                    </p>
                 </div>
 
-                <div class="flex gap-2">
-                    <button @click="openDetailsModal(booking)" class="rounded bg-blue-500 px-3 py-2 text-sm text-white hover:bg-blue-600">
+                <div class="flex flex-col gap-3">
+                    <button
+                        @click="openDetailsModal(booking)"
+                        class="rounded-lg bg-blue-600 px-5 py-3 text-base font-semibold text-white shadow hover:bg-blue-500"
+                    >
                         View Details
                     </button>
+
                     <button
                         v-if="booking.status && booking.status.toLowerCase() !== 'canceled' && booking.status.toLowerCase() === 'pending'"
                         @click="cancelReservation(booking)"
-                        class="rounded bg-red-500 px-3 py-2 text-sm text-white hover:bg-red-600"
+                        class="rounded-lg bg-red-600 px-5 py-3 text-base font-semibold text-white shadow hover:bg-red-500"
                     >
                         Cancel Reservation
                     </button>
@@ -180,7 +187,7 @@ const cancelReservation = async (booking) => {
                     <button
                         v-if="booking.status && booking.status.toLowerCase() === 'downpayment_update' && Number(booking.downpayment_amount) > 0"
                         @click="openPaymentModal(booking)"
-                        class="rounded bg-[#00f5a0] px-3 py-2 text-sm text-black hover:bg-[#07c686]"
+                        class="rounded-lg bg-[#00f5a0] px-5 py-3 text-base font-bold text-black shadow hover:bg-[#02ffbc]"
                     >
                         Make Payment
                     </button>
@@ -188,172 +195,186 @@ const cancelReservation = async (booking) => {
             </div>
         </section>
 
-        <div v-if="showPaymentModal" class="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div class="flex w-[720px] rounded-2xl border border-[#00f5a0]/30 bg-[rgba(0,0,0,0.88)] p-6 shadow-[0_0_20px_#00f5a0]">
-                <!-- LEFT: PAYMENT FORM -->
-                <div class="w-2/3 border-r border-[#00f5a0]/20 pr-6">
-                    <h3 class="font-orbitron mb-4 text-lg text-[#00f5a0]">Submit Payment</h3>
+        <div v-if="showPaymentModal" class="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+            <div class="flex w-[850px] rounded-2xl border border-[#00f5a0]/30 bg-[rgba(0,0,0,0.95)] p-8 shadow-[0_0_30px_#00f5a0]">
+                <div class="w-2/3 border-r border-[#00f5a0]/20 pr-8">
+                    <h3 class="font-orbitron mb-6 text-2xl font-bold text-[#00f5a0]">Submit Payment</h3>
 
-                    <p class="mb-1 text-sm text-[#93e3d3]">
-                        Event:
-                        <span class="font-semibold text-white">{{ selectedBooking.event.event_name }}</span>
-                    </p>
+                    <div class="mb-4 space-y-2 text-lg">
+                        <p class="text-[#93e3d3]">
+                            Event:
+                            <span class="ml-2 font-semibold text-white">{{
+                                selectedBooking.event ? selectedBooking.event.event_name : selectedBooking.event_name
+                            }}</span>
+                        </p>
 
-                    <p class="text-sm text-[#93e3d3]">
-                        Total Cost:
-                        <strong class="text-white">{{ formatCurrency(selectedBooking.total_cost) }}</strong>
-                    </p>
+                        <p class="text-[#93e3d3]">
+                            Total Cost: <strong class="ml-2 text-white">{{ formatCurrency(selectedBooking.total_cost) }}</strong>
+                        </p>
 
-                    <p class="mb-4 text-sm text-[#93e3d3]">
-                        Downpayment Required:
-                        <strong class="text-[#00f5a0]">{{ formatCurrency(selectedBooking.downpayment_amount) }}</strong>
-                    </p>
+                        <p class="text-[#93e3d3]">
+                            Downpayment: <strong class="ml-2 text-[#00f5a0]">{{ formatCurrency(selectedBooking.downpayment_amount) }}</strong>
+                        </p>
+                    </div>
 
-                    <label class="mb-1 block text-sm font-medium text-[#7fbfb0]">Amount to Pay</label>
-                    <input
-                        type="number"
-                        v-model="paymentForm.amount"
-                        class="mb-3 w-full rounded-md border border-[#00f5a0]/20 bg-black/40 px-3 py-2 text-white placeholder-gray-400 focus:border-[#00f5a0] focus:outline-none"
-                    />
+                    <div class="space-y-4">
+                        <div>
+                            <label class="mb-2 block text-base font-medium text-[#7fbfb0]">Amount to Pay</label>
+                            <input
+                                type="number"
+                                v-model="paymentForm.amount"
+                                class="w-full rounded-lg border border-[#00f5a0]/30 bg-black/40 px-4 py-3 text-lg text-white placeholder-gray-500 focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0] focus:outline-none"
+                            />
+                        </div>
 
-                    <label class="mb-1 block text-sm font-medium text-[#7fbfb0]">Reference Number</label>
-                    <input
-                        type="text"
-                        v-model="paymentForm.reference_number"
-                        required
-                        class="mb-3 w-full rounded-md border border-[#00f5a0]/20 bg-black/40 px-3 py-2 text-white placeholder-gray-400 focus:border-[#00f5a0] focus:outline-none"
-                    />
+                        <div>
+                            <label class="mb-2 block text-base font-medium text-[#7fbfb0]">Reference Number</label>
+                            <input
+                                type="text"
+                                v-model="paymentForm.reference_number"
+                                required
+                                class="w-full rounded-lg border border-[#00f5a0]/30 bg-black/40 px-4 py-3 text-lg text-white placeholder-gray-500 focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0] focus:outline-none"
+                            />
+                        </div>
 
-                    <label class="mb-1 block text-sm font-medium text-[#7fbfb0]">Upload Proof</label>
-                    <input type="file" @change="paymentForm.payment_proof = $event.target.files[0]" class="mb-4 w-full text-[#00f5a0]" required />
+                        <div>
+                            <label class="mb-2 block text-base font-medium text-[#7fbfb0]">Upload Proof</label>
+                            <input
+                                type="file"
+                                @change="paymentForm.payment_proof = $event.target.files[0]"
+                                class="w-full text-lg text-[#00f5a0]"
+                                required
+                            />
+                        </div>
+                    </div>
 
-                    <div class="flex justify-end gap-2">
+                    <div class="mt-8 flex justify-end gap-4">
                         <button
                             @click="closePaymentModal"
-                            class="rounded-md border border-gray-500 bg-transparent px-4 py-2 text-white hover:bg-gray-700/50"
+                            class="rounded-lg border border-gray-500 bg-transparent px-6 py-3 text-base text-white hover:bg-gray-700/50"
                         >
                             Cancel
                         </button>
 
-                        <button @click="submitPayment" class="rounded-md bg-[#00f5a0] px-4 py-2 font-semibold text-black hover:bg-[#07c686]">
-                            Submit
+                        <button @click="submitPayment" class="rounded-lg bg-[#00f5a0] px-6 py-3 text-base font-bold text-black hover:bg-[#07c686]">
+                            Submit Payment
                         </button>
                     </div>
                 </div>
 
-                <!-- RIGHT: QR CODE PANEL -->
-                <div class="flex w-1/3 flex-col items-center justify-center pl-6">
-                    <h4 class="font-orbitron text-md mb-3 text-[#00f5a0]">Scan QR to Pay</h4>
+                <div class="flex w-1/3 flex-col items-center justify-center pl-8">
+                    <h4 class="font-orbitron mb-4 text-xl font-bold text-[#00f5a0]">Scan QR to Pay</h4>
 
-                    <div class="rounded-xl border border-[#00f5a0]/30 bg-black/30 p-3 shadow-[0_0_12px_#00f5a0]" @click="enlargeQR = true">
-                        <img src="/qr_code/QRCode.png" alt="QR Code" class="h-48 w-48 object-contain" />
+                    <div
+                        class="cursor-pointer rounded-2xl border-2 border-[#00f5a0]/30 bg-black/30 p-4 shadow-[0_0_15px_#00f5a0] transition hover:scale-105"
+                        @click="enlargeQR = true"
+                    >
+                        <img src="/qr_code/QRCode.png" alt="QR Code" class="h-56 w-56 object-contain" />
                     </div>
 
-                    <p class="mt-3 text-center text-xs text-[#7fbfb0]">After paying, enter the reference number and upload proof.</p>
+                    <p class="mt-4 text-center text-sm text-[#7fbfb0]">Click to enlarge</p>
                 </div>
             </div>
         </div>
 
         <div
             v-if="enlargeQR"
-            class="animate-fadeIn fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            class="animate-fadeIn fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-md"
             @click="enlargeQR = false"
         >
-            <div class="rounded-xl border border-[#00f5a0]/40 bg-black/80 p-6 shadow-[0_0_20px_#00f5a0]">
-                <img src="/qr_code/QRCode.png" alt="Enlarged QR Code" class="h-96 w-96 object-contain" />
+            <div class="rounded-2xl border-2 border-[#00f5a0] bg-black p-8 shadow-[0_0_50px_#00f5a0]">
+                <img src="/qr_code/QRCode.png" alt="Enlarged QR Code" class="h-[500px] w-[500px] object-contain" />
             </div>
         </div>
 
-        <div v-if="showDetails" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md transition">
+        <div v-if="showDetails" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md transition">
             <div
-                class="animate-scaleIn max-h-[92vh] w-[820px] overflow-y-auto rounded-2xl border border-[#00f5a0]/40 bg-gradient-to-b from-[rgba(0,0,0,0.92)] to-[rgba(0,20,20,0.92)] p-7 shadow-[0_0_35px_#00f5a0]"
+                class="animate-scaleIn max-h-[95vh] w-[900px] overflow-y-auto rounded-3xl border border-[#00f5a0]/40 bg-[#0a0a0a] p-10 shadow-[0_0_50px_rgba(0,245,160,0.2)]"
             >
-                <!-- HEADER -->
-                <div class="mb-6 border-b border-[#00f5a0]/30 pb-4">
-                    <h2 class="font-orbitron text-2xl tracking-wide text-[#00f5a0]">Booking Details</h2>
-                    <p class="mt-1 text-xs text-[#91ffd7]">Viewing reservation information</p>
+                <div class="mb-8 border-b border-[#00f5a0]/30 pb-6">
+                    <h2 class="font-orbitron text-4xl font-bold tracking-wide text-[#00f5a0]">Booking Details</h2>
+                    <p class="mt-2 text-lg text-[#91ffd7]">Viewing reservation information</p>
                 </div>
 
-                <!-- GRID INFO -->
-                <div class="grid grid-cols-2 gap-x-10 gap-y-3">
+                <div class="grid grid-cols-2 gap-x-12 gap-y-8">
                     <div>
-                        <p class="mb-1 text-sm tracking-wide text-[#889] uppercase">Event</p>
-                        <p class="text-base text-[#dff]">{{ selectedDetails.event.event_name }}</p>
+                        <p class="mb-2 text-base font-bold tracking-wider text-gray-400 uppercase">Event</p>
+                        <p class="text-2xl font-semibold text-white">
+                            {{ selectedDetails.event ? selectedDetails.event.event_name : selectedDetails.event_name }}
+                        </p>
                     </div>
 
                     <div>
-                        <p class="mb-1 text-sm tracking-wide text-[#889] uppercase">Status</p>
-                        <span :class="statusColors(selectedDetails.status)" class="text-base">
+                        <p class="mb-2 text-base font-bold tracking-wider text-gray-400 uppercase">Status</p>
+                        <span :class="statusColors(selectedDetails.status)" class="text-2xl font-bold uppercase">
                             {{ selectedDetails.status }}
                         </span>
                     </div>
 
                     <div>
-                        <p class="mb-1 text-sm tracking-wide text-[#889] uppercase">Start Date</p>
-                        <p class="text-base text-[#dff]">{{ formatDate(selectedDetails.event_date) }}</p>
+                        <p class="mb-2 text-base font-bold tracking-wider text-gray-400 uppercase">Start Date</p>
+                        <p class="text-xl text-[#dff]">{{ formatDate(selectedDetails.event_date) }}</p>
                     </div>
 
                     <div>
-                        <p class="mb-1 text-sm tracking-wide text-[#889] uppercase">End Date</p>
-                        <p class="text-base text-[#dff]">{{ formatDate(selectedDetails.event_end_date) }}</p>
+                        <p class="mb-2 text-base font-bold tracking-wider text-gray-400 uppercase">End Date</p>
+                        <p class="text-xl text-[#dff]">{{ formatDate(selectedDetails.event_end_date) }}</p>
                     </div>
 
                     <div>
-                        <p class="mb-1 text-sm tracking-wide text-[#889] uppercase">Total Cost</p>
-                        <p class="text-lg font-semibold text-[#00f5a0]">
+                        <p class="mb-2 text-base font-bold tracking-wider text-gray-400 uppercase">Total Cost</p>
+                        <p class="text-3xl font-bold text-[#00f5a0]">
                             {{ formatCurrency(selectedDetails.total_cost) }}
                         </p>
                     </div>
 
                     <div>
-                        <p class="mb-1 text-sm tracking-wide text-[#889] uppercase">Downpayment</p>
-                        <p class="text-lg font-semibold text-[#08d6a0]">
+                        <p class="mb-2 text-base font-bold tracking-wider text-gray-400 uppercase">Downpayment</p>
+                        <p class="text-3xl font-bold text-[#08d6a0]">
                             {{ formatCurrency(selectedDetails.downpayment_amount) }}
                         </p>
                     </div>
                 </div>
 
-                <!-- NOTES -->
-                <div class="mt-7 border-t border-[#00f5a0]/30 pt-4">
-                    <p class="mb-1 text-sm tracking-wide text-[#889] uppercase">Notes</p>
-                    <p class="rounded-lg bg-black/30 p-3 text-sm leading-relaxed text-[#cfe]">
+                <div class="mt-10 border-t border-[#00f5a0]/30 pt-6">
+                    <p class="mb-3 text-base font-bold tracking-wider text-gray-400 uppercase">Notes</p>
+                    <p class="rounded-xl bg-white/5 p-6 text-lg leading-relaxed text-[#cfe]">
                         {{ selectedDetails.event_notes ?? 'No notes provided.' }}
                     </p>
                 </div>
 
-                <!-- MATERIALS -->
-                <div class="mt-8 border-t border-[#00f5a0]/30 pt-4">
-                    <h3 class="font-orbitron mb-3 text-lg tracking-wide text-[#00f5a0]">Materials Used</h3>
+                <div class="mt-10 border-t border-[#00f5a0]/30 pt-6">
+                    <h3 class="font-orbitron mb-4 text-2xl font-bold tracking-wide text-[#00f5a0]">Equipments Used</h3>
 
-                    <div v-if="selectedDetails.materials.length > 0">
+                    <div v-if="selectedDetails.materials.length > 0" class="grid grid-cols-1 gap-4">
                         <div
                             v-for="mat in selectedDetails.materials"
                             :key="mat.reserved_material_id"
-                            class="mb-2 rounded-md border border-[#00f5a0]/20 bg-black/20 p-3"
+                            class="rounded-lg border border-[#00f5a0]/20 bg-white/5 p-4"
                         >
-                            <p class="font-semibold text-[#dff]">{{ mat.material.material_name }}</p>
-                            <p class="text-sm text-[#aef]">
+                            <p class="text-xl font-bold text-white">{{ mat.material.material_name }}</p>
+                            <p class="mt-1 text-base text-gray-400">
                                 {{ mat.material.material_description }}
                             </p>
                         </div>
                     </div>
 
-                    <div v-else class="text-sm text-[#7fbfb0]">No materials attached.</div>
+                    <div v-else class="text-lg text-[#7fbfb0]">No equipments attached.</div>
                 </div>
 
-                <!-- FOOTER -->
-                <div class="mt-8 flex justify-end">
+                <div class="mt-10 flex justify-end">
                     <button
                         @click="showDetails = false"
-                        class="rounded-md bg-[#00f5a0] px-5 py-2.5 font-semibold text-black transition hover:bg-[#07c686]"
+                        class="rounded-lg bg-[#00f5a0] px-8 py-3 text-lg font-bold text-black transition hover:bg-[#07c686]"
                     >
-                        Close
+                        Close Details
                     </button>
                 </div>
             </div>
         </div>
     </MainLayout>
 </template>
+
 <style>
 .animate-fadeIn {
     animation: fadeIn 0.25s ease-out;
@@ -373,7 +394,7 @@ const cancelReservation = async (booking) => {
 
 @keyframes scaleIn {
     from {
-        transform: scale(0.8);
+        transform: scale(0.9);
         opacity: 0;
     }
     to {

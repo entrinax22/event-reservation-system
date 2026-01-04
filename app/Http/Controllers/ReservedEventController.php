@@ -398,7 +398,15 @@ class ReservedEventController extends Controller
             if (!empty($validated['materials'])) {
                 foreach ($validated['materials'] as $item) {
 
+                    if (empty($item['material_id'])) {
+                        continue;
+                    }
+
                     $material = Material::where('material_id', $item['material_id'])->first();
+
+                    if (!$material) {
+                        continue; 
+                    }
 
                     if ($material->material_quantity < $item['quantity']) {
                         return response()->json([
@@ -407,11 +415,9 @@ class ReservedEventController extends Controller
                         ], 400);
                     }
 
-                    // ✅ deduct and SAVE
                     $material->material_quantity -= $item['quantity'];
                     $material->save();
 
-                    // ✅ correct values
                     ReservedMaterial::create([
                         'reserved_event_id' => $reservation->reserved_event_id,
                         'material_id'       => $item['material_id'],
