@@ -46,19 +46,16 @@ const submitPayment = async () => {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        // Always show the correct message
         alert(response.data.message || response.data.msg || 'Payment submitted successfully.');
 
         closePaymentModal();
         fetchBookings();
     } catch (error) {
         if (error.response?.status === 422) {
-            // validation errors
             const errors = error.response.data.errors;
             const messages = Object.values(errors).flat().join('\n');
             alert(messages);
         } else {
-            // other errors
             alert(error.response?.data?.message || 'Something went wrong.');
         }
     }
@@ -78,6 +75,7 @@ onMounted(() => {
 });
 
 const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
@@ -352,10 +350,11 @@ const cancelReservation = async (booking) => {
                             :key="mat.reserved_material_id"
                             class="rounded-lg border border-[#00f5a0]/20 bg-white/5 p-4"
                         >
-                            <p class="text-xl font-bold text-white">{{ mat.material.material_name }}</p>
+                            <p class="text-xl font-bold text-white">{{ mat.material_name || 'Unknown Item' }}</p>
                             <p class="mt-1 text-base text-gray-400">
-                                {{ mat.material.material_description }}
+                                {{ mat.material_description }}
                             </p>
+                            <p class="mt-1 text-base text-[#00f5a0]">Quantity: {{ mat.material_quantity }}</p>
                         </div>
                     </div>
 

@@ -508,16 +508,40 @@ class ReservedEventController extends Controller
                 ], 401);
             }
 
-            $reservations = ReservedEvent::with(['event', 'materials.material'])
+            // 1. Get the raw collection from the database
+            $reservationsData = ReservedEvent::with(['event', 'materials.material'])
                 ->where('user_id', $user->user_id)
                 ->orderBy('reserved_event_id', 'desc')
                 ->get();
 
+            // 2. Map through the collection to format EACH item
+            $formattedReservations = $reservationsData->map(function ($reservation) {
+                return [
+                    'reserved_event_id'  => $reservation->reserved_event_id,
+                    'event_id'           => $reservation->event_id,
+                    'event_name'         => $reservation->event ? $reservation->event->event_name : $reservation->event_name,
+                    'event_date'         => $reservation->event_date,
+                    'event_end_date'     => $reservation->event_end_date,
+                    'total_cost'         => (float) $reservation->total_cost,
+                    'downpayment_amount' => (float) $reservation->downpayment_amount,
+                    'status'             => $reservation->status,
+                    'materials'          => $reservation->materials->map(function ($rm) {
+                        return [
+                            'material_id'          => $rm->material?->material_id,
+                            'material_name'        => $rm->material?->material_name ?? null,
+                            'material_description' => $rm->material?->material_description,
+                            'material_quantity'    => $rm->material_quantity,
+                        ];
+                    }),
+                ];
+            });
+
             return response()->json([
-                'result' => true,
+                'result'  => true,
                 'message' => 'User reservations retrieved successfully.',
-                'data' => $reservations,
+                'data'    => $formattedReservations, // Return the formatted list
             ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'result'  => false,

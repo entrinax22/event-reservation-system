@@ -321,16 +321,34 @@ async function openEditReservation(reservation) {
     selectedReservation.value = reservationData;
     showEditModal.value = true;
 }
-
 async function updateReservation(updatedData) {
     try {
         const materials = Array.isArray(updatedData.materials) ? updatedData.materials : [];
 
+        // --- LOGIC START ---
+        let finalEventId = updatedData.event_id;
+        let finalEventName = null; // Default to null
+
+        // Scenario 1: User selected "Other" -> We need a custom Name, ID is null
+        if (updatedData.event_id === 'other') {
+            finalEventId = null;
+            finalEventName = updatedData.event_name;
+        }
+        // Scenario 2: User selected a specific Event -> Use that ID, set Name to null
+        else if (updatedData.event_id) {
+            finalEventId = updatedData.event_id;
+            finalEventName = null; // Clear manual name to avoid confusion in DB
+        }
+        // --- LOGIC END ---
+
         const payload = {
             reserved_event_id: updatedData.reserved_event_id,
             user_id: updatedData.user_id,
-            event_id: updatedData.event_id === 'other' ? null : updatedData.event_id,
-            event_name: updatedData.event_name !== 'other' ? null : null,
+
+            // ✅ Updated Fields
+            event_id: finalEventId,
+            event_name: finalEventName,
+
             event_date: updatedData.event_date,
             event_end_date: updatedData.event_end_date,
             total_cost: updatedData.total_cost,
@@ -352,6 +370,7 @@ async function updateReservation(updatedData) {
         console.log('Reservation updated successfully');
     } catch (error) {
         console.error('Error updating reservation:', error.response?.data || error);
+        alert('Failed to update reservation.');
     }
 }
 

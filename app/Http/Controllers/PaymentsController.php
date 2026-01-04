@@ -41,7 +41,7 @@ class PaymentsController extends Controller
                 return [
                     'payment_id' => $payment->payment_id,
                     'user_name' => $payment->user->name ?? null,
-                    'event_name' => $payment->reservedEvent->event->event_name ?? null,
+                    'event_name' => $payment->reservedEvent->event->event_name ?? $payment->reservedEvent->event_name ?? null,
                     'amount' => $payment->amount,
                     'reference_number' => $payment->reference_number,
                     'payment_proof' => $payment->payment_proof ? asset('storage/' . $payment->payment_proof) : null,
@@ -119,6 +119,7 @@ class PaymentsController extends Controller
             $payment->save();
 
             $booking = ReservedEvent::find($payment->reserved_event_id);
+            
             if (! $booking) {
                 DB::rollBack();
                 return response()->json([
@@ -130,23 +131,29 @@ class PaymentsController extends Controller
             if($validated['status'] === 'completed'){
                 $booking->status = 'accepted';
                 $booking->save();
-            }else{
-                $booking->status = 'downpayment_update';
+            } else {
+                // Revert status if payment failed, or set to specific status
+                $booking->status = 'downpayment_update'; 
                 $booking->save();
             }
 
             DB::commit();
 
+            // Load relationships
             $booking->load(['event', 'materials', 'user']);
             $user = $booking->user;
-            $message = "Your payment for the event '{$booking->event->event_name}' has been updated to '{$validated['status']}'.";
 
-            // Send notification (database or in-app) first — prevents duplicate mail if notification sends mail channel
+            // ✅ FIX: Check if event relationship exists, otherwise use manual event_name
+            $eventName = $booking->event ? $booking->event->event_name : $booking->event_name;
+
+            $message = "Your payment for the event '{$eventName}' has been updated to '{$validated['status']}'.";
+
+            // Send notification
             if ($user) {
                 $user->notify(new NewUpdateReservationNotification($booking, $message));
             }
 
-            // Send the mail (queued) only if user has an email and you want a dedicated email
+            // Send Email
             if ($user && !empty($user->email)) {
                 try {
                     Mail::to($user->email)->send(new BookingUpdateMail($booking));
@@ -159,6 +166,7 @@ class PaymentsController extends Controller
                 'result' => true,
                 'message' => 'Payment updated successfully.'
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Payment update failed: ' . $e->getMessage());
