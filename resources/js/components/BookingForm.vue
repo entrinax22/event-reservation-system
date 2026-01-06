@@ -168,6 +168,10 @@
                         ></textarea>
                     </div>
 
+                    <p v-if="formError" class="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-400">
+                        {{ formError }}
+                    </p>
+
                     <div class="pt-4">
                         <button
                             type="submit"
@@ -219,6 +223,7 @@ const errors = reactive({});
 const successModal = ref(false);
 const otherInput = ref('');
 const selectedEvent = ref('');
+const formError = ref('');
 
 watch(selectedEvent, (val) => {
     if (val === 'other') {
@@ -283,10 +288,12 @@ function addMaterial() {
 function removeMaterial(index) {
     form.materials.splice(index, 1);
 }
-
 async function createReservation() {
     submitting.value = true;
+
+    // clear previous errors
     Object.keys(errors).forEach((k) => delete errors[k]);
+    formError.value = '';
 
     try {
         const payload = {
@@ -303,12 +310,9 @@ async function createReservation() {
 
         const response = await axios.post(route('reserved-online'), payload);
 
-        if (response.data?.result === false) {
-            alert(response.data.message);
-            return;
-        }
         successModal.value = true;
         fetchOptions();
+
         setTimeout(() => {
             successModal.value = false;
             emit('close');
@@ -316,9 +320,13 @@ async function createReservation() {
     } catch (error) {
         if (error.response?.status === 422) {
             Object.assign(errors, error.response.data.errors);
+        } else if (error.response?.status === 409) {
+            formError.value = error.response.data.message;
+        } else if (error.response?.status === 400) {
+            formError.value = error.response.data.message;
         } else {
-            console.error('Unexpected error:', error);
-            alert('Something went wrong. Please try again.');
+            formError.value = 'Something went wrong. Please try again.';
+            console.error(error);
         }
     } finally {
         submitting.value = false;

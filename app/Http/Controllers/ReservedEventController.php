@@ -377,7 +377,7 @@ class ReservedEventController extends Controller
         try {
             $validated = request()->validate([
                 'event_id'                => 'nullable|exists:events,event_id',
-                'event_name'              => 'required_without:event_id|string|max:255',
+                'event_name'              => 'nullable|string|max:255',
                 'event_date'              => 'required|date',
                 'event_end_date'          => 'required|date|after_or_equal:event_date',
                 'materials'               => 'nullable|array',
@@ -484,13 +484,18 @@ class ReservedEventController extends Controller
                 'data'    => $reservation,
             ]);
 
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $e->errors(),
+            ], 422);
+        }catch (\Exception $e) {
             return response()->json([
                 'result'  => false,
                 'message' => 'An error occurred while booking the event.',
-                'error'   => $e->getMessage(),
             ], 500);
         }
+        
     }
 
 

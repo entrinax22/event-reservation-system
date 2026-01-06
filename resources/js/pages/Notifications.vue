@@ -33,7 +33,7 @@
 
         <div v-if="selected" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div
-                class="relative max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-2xl border-2 border-[#00f5a0] bg-black p-8 shadow-[0_0_30px_rgba(0,245,160,0.3)]"
+                class="relative max-h-[70vh] w-full max-w-xl overflow-y-auto rounded-2xl border-2 border-[#00f5a0] bg-black p-8 shadow-[0_0_30px_rgba(0,245,160,0.3)]"
             >
                 <h3 class="mb-4 text-2xl font-bold text-[#00f5a0]">Notification Details</h3>
 
