@@ -1,5 +1,6 @@
 <template>
     <Head title="Admin Dashboard - Reserve Events" />
+
     <AdminLayout>
         <section class="space-y-8">
             <!-- Header -->
@@ -8,170 +9,162 @@
                 <p class="text-xl text-white">Create and manage reserved events.</p>
             </div>
 
-            <!-- Create Event Form -->
-            <form @submit.prevent.stop="createReservation" class="max-w-3xl space-y-6 rounded-xl bg-[rgba(0,0,0,0.85)] p-6 shadow-xl">
-                <h2 class="font-orbitron text-xl text-[#00f5a0]">Create New Reservation</h2>
+            <!-- Centered Form Wrapper -->
+            <div class="flex justify-center">
+                <form @submit.prevent.stop="createReservation" class="w-full max-w-3xl space-y-6 rounded-xl bg-[rgba(0,0,0,0.85)] p-6 shadow-xl">
+                    <h2 class="font-orbitron text-xl text-[#00f5a0]">Create New Reservation</h2>
 
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <!-- Select User -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm text-[#7fbfb0]">Select User</label>
-                        <BaseSelect v-model="form.user_id" :options="userOptions" placeholder="Choose a user" />
-                        <p v-if="errors.user_id" class="mt-1 text-xs text-red-400">{{ errors.user_id[0] }}</p>
-                    </div>
-
-                    <!-- Event Date -->
-                    <div class="md:col-span-1">
-                        <label for="event_date" class="block text-sm text-[#7fbfb0]">Event Date</label>
-                        <input
-                            id="event_date"
-                            type="date"
-                            v-model="form.event_date"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            required
-                        />
-                        <p v-if="errors.event_date" class="mt-1 text-xs text-red-400">{{ errors.event_date[0] }}</p>
-                    </div>
-
-                    <!-- Event End Date -->
-                    <div class="md:col-span-1">
-                        <label for="event_end_date" class="block text-sm text-[#7fbfb0]">Event End Date</label>
-                        <input
-                            id="event_end_date"
-                            type="date"
-                            v-model="form.event_end_date"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            required
-                        />
-                        <p v-if="errors.event_end_date" class="mt-1 text-xs text-red-400">{{ errors.event_end_date[0] }}</p>
-                    </div>
-
-                    <!-- Select Event -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm text-[#7fbfb0]">Select Event</label>
-                        <BaseSelect v-model="form.event_id" :options="eventOptions" placeholder="Choose an event" />
-                        <p v-if="errors.event_id" class="mt-1 text-xs text-red-400">{{ errors.event_id[0] }}</p>
-                    </div>
-
-                    <!-- Select Materials -->
-                    <div class="group md:col-span-2">
-                        <label class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase"> Materials Needed </label>
-
-                        <div class="space-y-4">
-                            <div v-for="(item, index) in form.materials" :key="index" class="flex gap-3">
-                                <!-- Material Select -->
-                                <BaseSelect
-                                    v-model="item.material_id"
-                                    :options="materialOptions"
-                                    placeholder="Select material..."
-                                    class="custom-select-override flex-1"
-                                />
-
-                                <!-- Quantity -->
-                                <input
-                                    type="number"
-                                    min="1"
-                                    v-model.number="item.quantity"
-                                    class="w-24 rounded-xl border border-white/10 bg-[#151515] px-3 py-3 text-sm text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]"
-                                    placeholder="Qty"
-                                />
-
-                                <!-- Remove Button -->
-                                <button
-                                    v-if="form.materials.length > 1"
-                                    type="button"
-                                    @click="removeMaterial(index)"
-                                    class="rounded-xl bg-red-500/20 px-3 text-red-400 hover:bg-red-500/30"
-                                >
-                                    ✕
-                                </button>
-                            </div>
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <!-- Select User -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm text-[#7fbfb0]">Select User</label>
+                            <BaseSelect v-model="form.user_id" :options="userOptions" placeholder="Choose a user" />
+                            <p v-if="errors.user_id" class="mt-1 text-xs text-red-400">
+                                {{ errors.user_id[0] }}
+                            </p>
                         </div>
 
-                        <!-- Add Another Button -->
-                        <button
-                            type="button"
-                            @click="addMaterial"
-                            class="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#00f5a0]/30 px-4 py-2 text-xs font-semibold text-[#00f5a0] hover:bg-[#00f5a0]/10"
-                        >
-                            + Add Another Material
-                        </button>
+                        <!-- Event Date -->
+                        <div>
+                            <label class="block text-sm text-[#7fbfb0]">Event Date</label>
+                            <input
+                                type="date"
+                                v-model="form.event_date"
+                                style="color-scheme: dark"
+                                class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
+                                required
+                            />
+                            <p v-if="errors.event_date" class="mt-1 text-xs text-red-400">
+                                {{ errors.event_date[0] }}
+                            </p>
+                        </div>
 
-                        <p v-if="errors.materials" class="mt-1 text-xs font-medium text-red-500">
-                            {{ errors.materials[0] }}
-                        </p>
-                    </div>
+                        <!-- Event End Date -->
+                        <div>
+                            <label class="block text-sm text-[#7fbfb0]">Event End Date</label>
+                            <input
+                                type="date"
+                                v-model="form.event_end_date"
+                                style="color-scheme: dark"
+                                class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
+                                required
+                            />
+                            <p v-if="errors.event_end_date" class="mt-1 text-xs text-red-400">
+                                {{ errors.event_end_date[0] }}
+                            </p>
+                        </div>
 
-                    <!-- Total Cost -->
-                    <div class="md:col-span-1">
-                        <label for="total_cost" class="block text-sm text-[#7fbfb0]">Total Cost</label>
-                        <input
-                            id="total_cost"
-                            type="number"
-                            v-model="form.total_cost"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            placeholder="Enter total cost"
-                            required
-                        />
-                        <p v-if="errors.total_cost" class="mt-1 text-xs text-red-400">{{ errors.total_cost[0] }}</p>
-                    </div>
+                        <!-- Select Event -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm text-[#7fbfb0]">Select Event</label>
+                            <BaseSelect v-model="form.event_id" :options="eventOptions" placeholder="Choose an event" />
+                            <p v-if="errors.event_id" class="mt-1 text-xs text-red-400">
+                                {{ errors.event_id[0] }}
+                            </p>
+                        </div>
 
-                    <!-- Downpayment -->
-                    <div class="md:col-span-1">
-                        <label for="downpayment_amount" class="block text-sm text-[#7fbfb0]">Downpayment Amount</label>
-                        <input
-                            id="downpayment_amount"
-                            type="number"
-                            v-model="form.downpayment_amount"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            readonly
-                        />
-                        <p v-if="errors.downpayment_amount" class="mt-1 text-xs text-red-400">{{ errors.downpayment_amount[0] }}</p>
-                    </div>
+                        <!-- Materials -->
+                        <div class="md:col-span-2">
+                            <label class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase"> Materials Needed </label>
 
-                    <!-- Status -->
-                    <div class="md:col-span-2">
-                        <label for="status" class="block text-sm text-[#7fbfb0]">Status</label>
-                        <select
-                            id="status"
-                            v-model="form.status"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            required
-                        >
-                            <option value="" disabled>Select status</option>
-                            <option value="pending">Pending</option>
-                            <option value="accepted">Accepted</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                        <p v-if="errors.status" class="mt-1 text-xs text-red-400">{{ errors.status[0] }}</p>
-                    </div>
+                            <div class="space-y-4">
+                                <div v-for="(item, index) in form.materials" :key="index" class="flex gap-3">
+                                    <BaseSelect
+                                        v-model="item.material_id"
+                                        :options="materialOptions"
+                                        placeholder="Select material..."
+                                        class="flex-1"
+                                    />
 
-                    <!-- Notes (full width) -->
-                    <div class="md:col-span-2">
-                        <label for="event_notes" class="block text-sm text-[#7fbfb0]">Event Notes</label>
-                        <textarea
-                            id="event_notes"
-                            v-model="form.event_notes"
-                            class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
-                            rows="3"
-                            placeholder="Additional notes..."
-                        ></textarea>
-                        <p v-if="errors.event_notes" class="mt-1 text-xs text-red-400">{{ errors.event_notes[0] }}</p>
-                    </div>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        v-model.number="item.quantity"
+                                        class="w-24 rounded-xl border border-white/10 bg-[#151515] px-3 py-3 text-sm text-white focus:border-[#00f5a0] focus:ring-1 focus:ring-[#00f5a0]"
+                                        placeholder="Qty"
+                                    />
 
-                    <!-- Submit button (full width) -->
-                    <div class="md:col-span-2">
-                        <button
-                            type="submit"
-                            :disabled="submitting"
-                            class="w-full rounded bg-[#00f5a0] px-4 py-2 font-semibold text-black transition hover:bg-[#00c88a] disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {{ submitting ? 'Creating...' : 'Create Reservation' }}
-                        </button>
+                                    <button
+                                        v-if="form.materials.length > 1"
+                                        type="button"
+                                        @click="removeMaterial(index)"
+                                        class="rounded-xl bg-red-500/20 px-3 text-red-400 hover:bg-red-500/30"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                @click="addMaterial"
+                                class="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#00f5a0]/30 px-4 py-2 text-xs font-semibold text-[#00f5a0] hover:bg-[#00f5a0]/10"
+                            >
+                                + Add Another Material
+                            </button>
+                        </div>
+
+                        <!-- Total Cost -->
+                        <div>
+                            <label class="block text-sm text-[#7fbfb0]">Total Cost</label>
+                            <input
+                                type="number"
+                                v-model="form.total_cost"
+                                class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
+                                required
+                            />
+                        </div>
+
+                        <!-- Downpayment -->
+                        <div>
+                            <label class="block text-sm text-[#7fbfb0]">Downpayment</label>
+                            <input
+                                type="number"
+                                v-model="form.downpayment_amount"
+                                readonly
+                                class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white"
+                            />
+                        </div>
+
+                        <!-- Status -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm text-[#7fbfb0]">Status</label>
+                            <select
+                                v-model="form.status"
+                                class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
+                                required
+                            >
+                                <option value="" disabled>Select status</option>
+                                <option value="pending">Pending</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm text-[#7fbfb0]">Event Notes</label>
+                            <textarea
+                                v-model="form.event_notes"
+                                rows="3"
+                                class="mt-1 w-full rounded border border-gray-600 bg-black/40 px-3 py-2 text-white focus:ring-2 focus:ring-[#00f5a0] focus:outline-none"
+                            ></textarea>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="md:col-span-2">
+                            <button
+                                type="submit"
+                                :disabled="submitting"
+                                class="w-full rounded bg-[#00f5a0] px-4 py-2 font-semibold text-black transition hover:bg-[#00c88a] disabled:opacity-50"
+                            >
+                                {{ submitting ? 'Creating...' : 'Create Reservation' }}
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </section>
     </AdminLayout>
 </template>

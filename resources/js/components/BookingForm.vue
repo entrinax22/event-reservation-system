@@ -4,9 +4,9 @@
         @click.self="$emit('close')"
     >
         <div
-            class="relative w-full max-w-2xl transform overflow-hidden rounded-3xl border border-white/20 bg-black/90 shadow-[0_0_50px_rgba(0,245,160,0.15)] backdrop-blur-xl transition-all duration-300 sm:p-0"
+            class="relative flex max-h-[80vh] w-full max-w-2xl transform flex-col overflow-hidden rounded-3xl border border-white/20 bg-black/90 shadow-[0_0_50px_rgba(0,245,160,0.15)] backdrop-blur-xl transition-all duration-300 sm:p-0"
         >
-            <div class="relative flex items-center justify-between border-b border-white/10 bg-white/5 px-8 py-6">
+            <div class="relative flex shrink-0 items-center justify-between border-b border-white/10 bg-white/5 px-8 py-6">
                 <div>
                     <h2 class="font-orbitron text-xl font-bold tracking-wide text-white">Create Reservation</h2>
                     <p class="mt-1 text-xs text-gray-400">Fill in the details below to book a new event.</p>
@@ -28,7 +28,7 @@
                 </button>
             </div>
 
-            <div class="custom-scrollbar max-h-[85vh] overflow-y-auto px-8 py-8">
+            <div class="custom-scrollbar flex-1 overflow-y-auto px-8 py-8">
                 <form @submit.prevent="createReservation" class="space-y-6">
                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div class="group relative">

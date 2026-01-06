@@ -206,6 +206,9 @@ class ReservedEventController extends Controller
 
             $reservedEvent = ReservedEvent::findOrFail($validated['reserved_event_id']);
 
+            // 1. Capture the original status BEFORE updating
+            $originalStatus = $reservedEvent->status;
+
             // Update main fields
             $updateData = collect($validated)->except(['reserved_event_id', 'materials'])->toArray();
             if (isset($updateData['total_cost'])) $updateData['total_cost'] = (float) $updateData['total_cost'];
@@ -223,10 +226,29 @@ class ReservedEventController extends Controller
 
             $reservedEvent->update($updateData);
 
-            // Handle materials
-            if (isset($validated['materials'])) {
+            // 2. CHECK: If status changed to 'completed', restore stock
+            if ($validated['status'] === 'completed' && $originalStatus !== 'completed') {
+                
+                // Loop through existing reserved materials
+                foreach ($reservedEvent->materials as $reservedMaterial) {
+                    $material = Material::find($reservedMaterial->material_id);
+                    
+                    if ($material) {
+                        // Access the pivot quantity and add it back to main stock
+                        $qtyToRestore = $reservedMaterial->material_quantity;
+                        $material->increment('material_quantity', $qtyToRestore);
+                    }
+                }
+                
+                // Note: We do NOT process $validated['materials'] here. 
+                // If an event is completed, we assume the items used are being returned. 
+                // We keep the ReservedMaterial records for history.
 
-                // Restore old stock first
+            } 
+            // 3. ELSE: Handle normal material updates (Only if NOT completing)
+            elseif (isset($validated['materials'])) {
+
+                // Restore old stock first (Standard update logic)
                 foreach ($reservedEvent->materials as $oldMaterial) {
                     $material = Material::find($oldMaterial->material_id);
                     if ($material) {
@@ -235,7 +257,6 @@ class ReservedEventController extends Controller
                     }
                 }
 
-                // Remove old pivot records
                 ReservedMaterial::where('reserved_event_id', $reservedEvent->reserved_event_id)->delete();
 
                 // Add new materials and adjust stock
@@ -265,11 +286,17 @@ class ReservedEventController extends Controller
 
             // Reload relationships
             $reservedEvent->load('materials', 'user');
-
+            
             // Notifications
             $user = $reservedEvent->user;
             if ($user) {
                 $message = 'Your reservation has been updated.';
+                
+                // Customize message for completion
+                if ($validated['status'] === 'completed') {
+                    $message = 'Your event has been marked as completed. Thank you!';
+                }
+
                 $user->notify(new NewUpdateReservationNotification($reservedEvent, $message));
 
                 if ($user->email) {
@@ -318,6 +345,14 @@ class ReservedEventController extends Controller
 
             $reservedEvent = ReservedEvent::with('materials')
                 ->findOrFail($validated['reserved_event_id']);
+
+            $reservedEvent->materials->each(function ($reservedMaterial) {
+                $material = Material::find($reservedMaterial->material_id);
+                if ($material) {
+                    $material->material_quantity += $reservedMaterial->material_quantity;
+                    $material->save();
+                }
+            });
 
             $reservedEvent->materials()->delete();
 
@@ -569,6 +604,15 @@ class ReservedEventController extends Controller
             $reservation = ReservedEvent::where('reserved_event_id', $validated['reserved_event_id'])
                 ->where('user_id', $user->user_id)
                 ->first();
+            $reservation->load('materials');
+
+            $reservation->materials->each(function ($reservedMaterial) {
+                $material = Material::find($reservedMaterial->material_id);
+                if ($material) {
+                    $material->material_quantity += $reservedMaterial->material_quantity;
+                    $material->save();
+                }
+            });
 
             if (!$reservation) {
                 return response()->json([
