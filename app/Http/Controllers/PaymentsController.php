@@ -160,14 +160,14 @@ class PaymentsController extends Controller
                 $user->notify(new NewUpdateReservationNotification($booking, $message));
             }
 
-            // Send Email
-            if ($user && !empty($user->email)) {
-                try {
-                    Mail::to($user->email)->send(new BookingUpdateMail($booking));
-                } catch (\Exception $mailError) {
-                    Log::error('Mail sending failed: ' . $mailError->getMessage());
-                }
-            }
+            // Send Email (disabled)
+            // if ($user && !empty($user->email)) {
+            //     try {
+            //         Mail::to($user->email)->send(new BookingUpdateMail($booking));
+            //     } catch (\Exception $mailError) {
+            //         Log::error('Mail sending failed: ' . $mailError->getMessage());
+            //     }
+            // }
 
             return response()->json([
                 'result' => true,

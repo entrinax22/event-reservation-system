@@ -295,8 +295,8 @@ class UserController extends Controller
                 'expires_at' => Carbon::now()->addMinutes(5)
             ]);
 
-            // Send email
-            Mail::to($user->email)->send(new OtpMail($otpCode));
+            // Send email (disabled)
+            // Mail::to($user->email)->send(new OtpMail($otpCode));
 
             return response()->json([
                 'result' => true,
@@ -377,8 +377,8 @@ class UserController extends Controller
                 'expires_at' => Carbon::now()->addMinutes(5)
             ]);
 
-            // Send email
-            Mail::to($user->email)->send(new OtpMail($otpCode));
+            // Send email (disabled)
+            // Mail::to($user->email)->send(new OtpMail($otpCode));
 
             return response()->json([
                 'result' => true,

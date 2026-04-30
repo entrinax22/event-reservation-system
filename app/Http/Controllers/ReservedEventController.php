@@ -91,14 +91,13 @@ class ReservedEventController extends Controller
                 $admin->notify(new AdminNewReservationNotification($reservation));
             }
             
-            if ($user && $user->email) {
-                try {
-                    
-                    Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
-                } catch (\Exception $mailError) {
-                    Log::error('Mail sending failed: ' . $mailError->getMessage());
-                }
-            }
+            // if ($user && $user->email) {
+            //     try {
+            //         Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
+            //     } catch (\Exception $mailError) {
+            //         Log::error('Mail sending failed: ' . $mailError->getMessage());
+            //     }
+            // }
 
             return response()->json([
                 'result'  => true,
@@ -299,13 +298,13 @@ class ReservedEventController extends Controller
 
                 $user->notify(new NewUpdateReservationNotification($reservedEvent, $message));
 
-                if ($user->email) {
-                    try {
-                        Mail::to($user->email)->send(new BookingUpdateMail($reservedEvent));
-                    } catch (\Exception $mailError) {
-                        Log::error('Mail sending failed: ' . $mailError->getMessage());
-                    }
-                }
+                // if ($user->email) {
+                //     try {
+                //         Mail::to($user->email)->send(new BookingUpdateMail($reservedEvent));
+                //     } catch (\Exception $mailError) {
+                //         Log::error('Mail sending failed: ' . $mailError->getMessage());
+                //     }
+                // }
             }
 
             return response()->json([
@@ -469,14 +468,14 @@ class ReservedEventController extends Controller
                 $admin->notify(new AdminNewReservationNotification($reservation));
             }
             
-            // SEND EMAIL
-            if ($user->email) {
-                try {
-                    Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
-                } catch (\Exception $mailError) {
-                    Log::error('Mail sending failed: ' . $mailError->getMessage());
-                }
-            }
+            // SEND EMAIL (disabled)
+            // if ($user->email) {
+            //     try {
+            //         Mail::to($user->email)->send(new BookingConfirmationMail($reservation));
+            //     } catch (\Exception $mailError) {
+            //         Log::error('Mail sending failed: ' . $mailError->getMessage());
+            //     }
+            // }
 
             return response()->json([
                 'result'  => true,
