@@ -9,6 +9,7 @@ FROM richarvey/nginx-php-fpm:3.1.6
 
 COPY . .
 COPY --from=frontend /app/public/build /var/www/html/public/build
+COPY nginx/default.conf /etc/nginx/sites-enabled/default.conf
 
 RUN composer install --no-dev --optimize-autoloader
 
