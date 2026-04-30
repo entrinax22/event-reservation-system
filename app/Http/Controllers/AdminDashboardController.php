@@ -42,7 +42,7 @@ class AdminDashboardController extends Controller
                 });
 
             // Monthly bookings for chart
-            $monthlyBookings = ReservedEvent::selectRaw("MONTH(event_date) as month_num, COUNT(*) as count")
+            $monthlyBookings = ReservedEvent::selectRaw("EXTRACT(MONTH FROM event_date) as month_num, COUNT(*) as count")
                 ->whereYear('event_date', now()->year)
                 ->groupBy('month_num')
                 ->orderBy('month_num')
