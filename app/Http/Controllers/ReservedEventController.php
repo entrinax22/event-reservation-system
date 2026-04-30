@@ -126,12 +126,12 @@ class ReservedEventController extends Controller
                 $query->where(function ($q) use ($search) {
                     // Search event name/date
                     $q->whereHas('event', function ($qe) use ($search) {
-                        $qe->where('event_name', 'like', '%' . $search . '%')
-                        ->orWhere('event_date', 'like', '%' . $search . '%');
+                        $qe->where('event_name', 'ilike', '%' . $search . '%')
+                        ->orWhere('event_date', 'ilike', '%' . $search . '%');
                     })
                     // Search materials (nested relationship)
                     ->orWhereHas('materials.material', function ($qm) use ($search) {
-                        $qm->where('material_name', 'like', '%' . $search . '%');
+                        $qm->where('material_name', 'ilike', '%' . $search . '%');
                     });
                 });
             }

@@ -54,8 +54,8 @@ class MaterialController extends Controller
 
             if ($search) {
                 $materials->where(function ($q) use ($search) {
-                    $q->where('material_name', 'like', '%' . $search . '%')
-                      ->orWhere('material_description', 'like', '%' . $search . '%');
+                    $q->where('material_name', 'ilike', '%' . $search . '%')
+                      ->orWhere('material_description', 'ilike', '%' . $search . '%');
                 });
             }
 

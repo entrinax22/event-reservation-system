@@ -280,6 +280,7 @@ const reservationFields = [
             { value: 'pending', label: 'Pending' },
             { value: 'accepted', label: 'Accepted' },
             { value: 'downpayment_update', label: 'Downpayment Update' },
+            { value: 'downpayment_paid', label: 'Downpayment Paid' },
             { value: 'completed', label: 'Completed' },
             { value: 'cancelled', label: 'Cancelled' },
         ],

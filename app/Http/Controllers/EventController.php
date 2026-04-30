@@ -52,8 +52,8 @@ class EventController extends Controller
 
             if ($search) {
                 $events->where(function ($q) use ($search) {
-                    $q->where('event_name', 'like', '%' . $search . '%')
-                      ->orWhere('event_description', 'like', '%' . $search . '%');
+                    $q->where('event_name', 'ilike', '%' . $search . '%')
+                      ->orWhere('event_description', 'ilike', '%' . $search . '%');
                 });
             }
 

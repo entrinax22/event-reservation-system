@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use App\Models\Payment;
-use Illuminate\Http\Request;
-use App\Models\ReservedEvent;
 use App\Mail\BookingUpdateMail;
+use App\Models\Payment;
+use App\Models\ReservedEvent;
+use App\Notifications\NewUpdateReservationNotification;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Notifications\NewUpdateReservationNotification;
+use Inertia\Inertia;
 
 class PaymentsController extends Controller
 {
@@ -30,10 +31,10 @@ class PaymentsController extends Controller
 
             if($search){
                 $query->whereHas('user', function($q) use ($search){
-                    $q->where('name', 'like', '%' . $search . '%');
+                    $q->where('name', 'ilike', '%' . $search . '%');
                 })->orWhereHas('reservedEvent.event', function($q) use ($search){
-                    $q->where('event_name', 'like', '%' . $search . '%');
-                })->orWhere('reference_number', 'like', '%' . $search . '%');
+                    $q->where('event_name', 'ilike', '%' . $search . '%');
+                })->orWhere('reference_number', 'ilike', '%' . $search . '%');
             }
             $payments = $query->orderBy('payment_id', 'desc')->paginate(10);
 
@@ -78,7 +79,7 @@ class PaymentsController extends Controller
                 'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             ]);
 
-            $user = Auth()->user();
+            $user = Auth::user();
 
             $payment = new Payment();
             $payment->user_id = $user->user_id;
@@ -91,6 +92,12 @@ class PaymentsController extends Controller
                 $payment->payment_proof = $path;
             }
             $payment->save();
+
+            $reservedEvent = ReservedEvent::find($validated['reserved_event_id']);
+            if ($reservedEvent) {
+                $reservedEvent->status = 'downpayment_paid';
+                $reservedEvent->save();
+            }
 
             return response()->json([
                 'result' => true,
@@ -204,7 +211,7 @@ class PaymentsController extends Controller
                 'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             ]);
 
-            $user = Auth()->user();
+            $user = Auth::user();
 
             $payment = new Payment();
             $payment->user_id = $user->user_id;
@@ -217,6 +224,12 @@ class PaymentsController extends Controller
                 $payment->payment_proof = $path;
             }
             $payment->save();
+
+            $reservedEvent = ReservedEvent::find($validated['reserved_event_id']);
+            if ($reservedEvent) {
+                $reservedEvent->status = 'downpayment_paid';
+                $reservedEvent->save();
+            }
 
             return response()->json([
                 'result' => true,

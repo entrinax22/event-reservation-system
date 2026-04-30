@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('total_cost', 10, 2)->default(0);
             $table->string('event_notes')->nullable();
             $table->decimal('downpayment_amount', 10, 2)->default(0);
-            $table->enum('status', ['pending','accepted', 'downpayment_update','completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending','accepted', 'downpayment_update','downpayment_paid','completed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
     }

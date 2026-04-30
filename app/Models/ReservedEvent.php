@@ -3,6 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Event;
+use App\Models\ReservedMaterial;
+use App\Models\Payment;
 
 class ReservedEvent extends Model
 {
